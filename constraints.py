@@ -1,5 +1,5 @@
 class Constraint:
-    def __init__(self, primitives, constants):
+    def __init__(self, primitives, constants = []):
         self.primitives = primitives
         self.constants = constants
 
@@ -56,6 +56,21 @@ class FixedLength(Constraint):
             self._p1.y: 2 * (self._p1.y.value - self._p2.y.value),
             self._p2.x: 2 * (self._p2.x.value - self._p1.x.value),
             self._p2.y: 2 * (self._p2.y.value - self._p1.y.value)
+            }
+
+class Horizontal(Constraint):
+    def update(self):
+        line = self.primitives[0]
+        self._y1 = line.variables[0].y
+        self._y2 = line.variables[1].y
+
+    def get_error(self):
+        return self._y1.value - self._y2.value
+
+    def get_error_pds(self):
+        return {
+            self._y1: 1,
+            self._y2: -1
             }
 
 #class EqualRadius(Constraint):

@@ -3,14 +3,10 @@ import numpy
 class Scene:
     def __init__(self):
         self._primitives = []
-
         self._constraints = []
-        self._variables = set()
 
     def add_primitive(self, primitive):
         self._primitives.append(primitive)
-        for var in primitive.variables:
-            self._variables.update(var.expand())
 
     def add_constraint(self, constraint):
         self._constraints.append(constraint)
@@ -19,14 +15,17 @@ class Scene:
     def solve(self):
         pds = {}
         variables_map = {}
-        variables = list(self._variables)
 
-        for i, var in enumerate(variables):
-            variables_map[var] = i
+        variables = []
+
+        for constraint in self._constraints:
+            for var in constraint.get_error_pds():
+                variables_map[var] = len(variables)
+                variables.append(var)
 
         for i in range(5):
             jacobian = numpy.matrix(numpy.zeros(
-                shape=(len(self._constraints), len(self._variables))))
+                shape=(len(self._constraints), len(variables))))
             for constraint_id, constraint in enumerate(self._constraints):
                 for var, pd in constraint.get_error_pds().items():
                     var_id = variables_map[var]

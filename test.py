@@ -18,6 +18,7 @@ l3 = primitives.LineSegment(c, a)
 c1 = constraints.FixedLength([l1], [2])
 c2 = constraints.FixedLength([l2], [2])
 c3 = constraints.FixedLength([l3], [2])
+c4 = constraints.Horizontal([l3])
 
 s.add_primitive(l1)
 s.add_primitive(l2)
@@ -26,6 +27,7 @@ s.add_primitive(l3)
 s.add_constraint(c1)
 s.add_constraint(c2)
 s.add_constraint(c3)
+s.add_constraint(c4)
 
 with open("/tmp/test.svg", "w") as fp:
     s.export_svg(fp, 100)
