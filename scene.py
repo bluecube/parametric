@@ -41,7 +41,7 @@ class Scene:
                 var.value -= correction
 
 
-            with open("/tmp/test{}.svg".format(i), "w") as fp:
+            with open("/tmp/test{}.svg".format(i + 1), "w") as fp:
                 self.export_svg(fp, 100)
 
     def export_svg(self, fp, scale = 100):

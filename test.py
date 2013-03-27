@@ -29,7 +29,7 @@ s.add_constraint(c2)
 s.add_constraint(c3)
 s.add_constraint(c4)
 
-with open("/tmp/test.svg", "w") as fp:
+with open("/tmp/test0.svg", "w") as fp:
     s.export_svg(fp, 100)
 
 s.solve()
