@@ -58,6 +58,21 @@ class FixedLength(Constraint):
             self._p2.y: 2 * (self._p2.y.value - self._p1.y.value)
             }
 
+class Vertical(Constraint):
+    def update(self):
+        line = self.primitives[0]
+        self._x1 = line.variables[0].x
+        self._x2 = line.variables[1].x
+
+    def get_error(self):
+        return self._x1.value - self._x2.value
+
+    def get_error_pds(self):
+        return {
+            self._x1: 1,
+            self._x2: -1
+            }
+
 class Horizontal(Constraint):
     def update(self):
         line = self.primitives[0]
