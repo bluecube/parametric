@@ -45,7 +45,20 @@ class Scene:
                 self.export_svg(fp, 100)
 
     def export_svg(self, fp, scale = 100):
-        fp.write('<svg xmlns="http://www.w3.org/2000/svg">\n')
+        fp.write("""<svg xmlns="http://www.w3.org/2000/svg">
+<style type="text/css">
+.primitives {
+   width: 1;
+   stroke: black;
+}
+.cp {
+   fill: none;
+   stroke: orange;
+}
+</style>""")
+        fp.write("\n")
+
         for primitive in self._primitives:
             primitive.export_svg(fp, scale)
+
         fp.write('</svg>\n')

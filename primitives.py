@@ -1,6 +1,7 @@
+import drawables
 import variables
 
-class Primitive:
+class Primitive(drawables.Drawable):
     def __init__(self, *variables):
         self.variables = variables
 
@@ -12,6 +13,11 @@ class Primitive:
 #            prop = property(getter, setter)
 #            setattr(self.__class__, name, prop)
 
+    def export_svg(self, fp, scale):
+        """ Draw control points to svg. To be called as super().export_svg(...) """
+        for var in self.variables:
+            if isinstance(var, variables.ControlPoint2D):
+                var.export_svg(fp, scale)
 
 #class Point(Primitive):
 #    def __init__(self, p):
@@ -22,9 +28,10 @@ class LineSegment(Primitive):
 #    VARIABLE_NAMES = ["p1", "p2"]
 
     def export_svg(self, fp, scale):
-        fp.write('<line x1="{}" y1="{}" x2="{}" y2="{}" width="1" stroke="black" />\n'.format(
-            int(self.variables[0].x.value * scale), int(self.variables[0].y.value * scale),
-            int(self.variables[1].x.value * scale), int(self.variables[1].y.value * scale)))
+        fp.write('<line x1="{}" y1="{}" x2="{}" y2="{}" class="primitives" />\n'.format(
+            self.variables[0].x.value * scale, self.variables[0].y.value * scale,
+            self.variables[1].x.value * scale, self.variables[1].y.value * scale))
+        super(LineSegment, self).export_svg(fp, scale)
 
 #class Circle(Primitive):
 #    def __init__(self, center, radius):
