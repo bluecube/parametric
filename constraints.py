@@ -38,8 +38,8 @@ class FixedLength(Constraint):
         length = self.constants[0]
         self._l2 = length * length
         line = self.primitives[0]
-        self._p1 = line.variables[0]
-        self._p2 = line.variables[1]
+        self._p1 = line.p1
+        self._p2 = line.p2
 
     def get_error(self):
         x = self._p1.x.value - self._p2.x.value
@@ -61,8 +61,8 @@ class FixedLength(Constraint):
 class Vertical(Constraint):
     def update(self):
         line = self.primitives[0]
-        self._x1 = line.variables[0].x
-        self._x2 = line.variables[1].x
+        self._x1 = line.p1.x
+        self._x2 = line.p2.x
 
     def get_error(self):
         return self._x1.value - self._x2.value
@@ -76,8 +76,8 @@ class Vertical(Constraint):
 class Horizontal(Constraint):
     def update(self):
         line = self.primitives[0]
-        self._y1 = line.variables[0].y
-        self._y2 = line.variables[1].y
+        self._y1 = line.p1.y
+        self._y2 = line.p2.y
 
     def get_error(self):
         return self._y1.value - self._y2.value

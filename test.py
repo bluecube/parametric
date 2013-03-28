@@ -7,16 +7,16 @@ import constraints
 
 s = scene.Scene()
 
-a = variables.ControlPoint2D(0, 2)
-b = variables.ControlPoint2D(1, 0)
-c = variables.ControlPoint2D(3, 3)
+a = primitives.Point(0, 2)
+b = primitives.Point(1, 0)
+c = primitives.Point(3, 3)
 
 l1 = primitives.LineSegment(a, b)
 l2 = primitives.LineSegment(b, c)
 l3 = primitives.LineSegment(c, a)
 
 c1 = constraints.FixedLength([l1], [2])
-c2 = constraints.FixedLength([l2], [2])
+c2 = constraints.FixedLength([l2], [3])
 c3 = constraints.FixedLength([l3], [2])
 c4 = constraints.Horizontal([l3])
 
