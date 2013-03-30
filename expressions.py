@@ -67,6 +67,9 @@ class Expr(object):
     def __float__(self):
         return float(self.get_value())
 
+    def __str__(self):
+        raise NotImplementedError()
+
     def _term_values(self):
         return (term.get_value() for term in self._terms)
 
@@ -81,12 +84,26 @@ class Expr(object):
             all_vars.update(pds.keys())
         return pds_list, all_vars
 
+    def _str_infix_helper(self, op):
+        return "(" + (" " + op + " ").join(str(term) for term in self._terms) + ")"
+
+    def _str_func_helper(self, func):
+        return func + "(" + ", ".join( str(term) for term in self._terms) + ")"
+
 
 class Variable(Expr):
     """ Variable used as an parameter of the model. """
 
-    def __init__(self, value):
+    _auto_naming_counter = 1
+
+    def __init__(self, value, name=None):
         self._value = value
+
+        if name:
+            self._name = name
+        else:
+            self._name = "var" + str(self._auto_naming_counter)
+            self.__class__._auto_naming_counter += 1
 
     def get_value(self):
         return self._value
@@ -100,6 +117,9 @@ class Variable(Expr):
     def get_pds(self):
         return {self: 1}
 
+    def __str__(self):
+        return self._name
+
 
 class _Constant(Expr):
     def __init__(self, value):
@@ -111,6 +131,8 @@ class _Constant(Expr):
     def get_pds(self):
         return {}
 
+    def __str__(self):
+        return str(self.get_value())
 
 class _Add(Expr):
     def __init__(self, *terms):
@@ -127,11 +149,15 @@ class _Add(Expr):
                 ret[var] = pd
         return ret
 
+    def __str__(self):
+        return self._str_infix_helper("+")
+
 
 class _Sub(Expr):
     def __init__(self, f, g):
         self._f = f
         self._g = g
+        super(_Sub, self).__init__(f, g)
 
     def get_value(self):
         return self._f.get_value() - self._g.get_value()
@@ -142,6 +168,9 @@ class _Sub(Expr):
             pd = ret.get(var, 0) - pd
             ret[var] = pd
         return ret
+
+    def __str__(self):
+        return self._str_infix_helper("-")
 
 
 class _Mul(Expr):
@@ -162,6 +191,9 @@ class _Mul(Expr):
                 if var in pds_list[i] and term_values[i] != 0)
             for var in all_vars}
 
+    def __str__(self):
+        return self._str_infix_helper("*")
+
 
 class _Div(Expr):
     def __init__(self, f, g):
@@ -181,6 +213,9 @@ class _Div(Expr):
         return {
             var: tmp * (f_pds.get(var, 0) * g_val - g_pds.get(var, 0) * f_val)
             for var in all_vars}
+
+    def __str__(self):
+        return self._str_infix_helper("/")
 
 
 #class _Pow(Expr):
@@ -208,6 +243,9 @@ class _Sq(Expr):
         val = self._f.get_value()
         return {var: 2 * val * pd for var, pd in self._f.get_pds().items()}
 
+    def __str__(self):
+        return self._str_func_helper("sq")
+
 
 class _Sqrt(Expr):
     def __init__(self, f):
@@ -219,6 +257,9 @@ class _Sqrt(Expr):
     def get_pds(self):
         tmp = 2 / math.sqrt(self._f.get_value())
         return {var: tmp * pd for var, pd in self._f.get_pds().items() if pd != 0}
+
+    def __str__(self):
+        return self._str_func_helper("sqrt")
 
 
 class _Acos(Expr):
@@ -232,6 +273,8 @@ class _Acos(Expr):
         tmp = -1 / math.sqrt(1 - self._f.get_value())
         return {var: tmp * pd for var, pd in self._f.get_pds().items() if pd != 0}
 
+    def __str__(self):
+        return self._str_func_helper("acos")
 
 
 #class DotProduct(Expr):
