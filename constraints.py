@@ -1,9 +1,9 @@
-import variables
+import expressions
 
 class Constraint:
     def get_error(self):
         """ Return the current error of this constraint (based on values of
-        variables in the linked primitives).
+        expressions in the linked primitives).
 
         The error must be positive!"""
         raise NotImplementedError()
@@ -16,7 +16,7 @@ class Constraint:
 
 class Equal(Constraint):
     def __init__(self, a, b):
-        self._expr = variables.sub(a, b)
+        self._expr = expressions.sub(a, b)
 
     def get_error(self):
         return self._expr.get_value()

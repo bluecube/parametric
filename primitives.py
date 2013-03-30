@@ -1,13 +1,13 @@
 import drawables
-import variables
+import expressions
 
 class Primitive(drawables.Drawable):
-    def __init__(self, subobjects, own_variables):
+    def __init__(self, subobjects, own_expressions):
         self.subobjects = subobjects
-        self.variables = set(own_variables)
+        self.expressions = set(own_expressions)
 
         for obj in self.subobjects:
-            self.variables.update(obj.variables)
+            self.expressions.update(obj.expressions)
 
     def export_svg(self, fp, scale):
         """ Draw subobjects to svg. To be called as super().export_svg(...) """
@@ -36,9 +36,9 @@ class LineSegment(Primitive):
         self.p1 = p1
         self.p2 = p2
 
-        vx = variables.sub(p1.x, p2.x)
-        vy = variables.sub(p1.y, p2.y)
-        self.length = variables.sqrt(variables.dot_product(vx, vy, vx, vy))
+        vx = expressions.sub(p1.x, p2.x)
+        vy = expressions.sub(p1.y, p2.y)
+        self.length = expressions.sqrt(expressions.dot_product(vx, vy, vx, vy))
 
         super(LineSegment, self).__init__([p1, p2], [])
 

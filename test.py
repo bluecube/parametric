@@ -2,13 +2,13 @@
 
 import scene
 import primitives
-import variables
+import expressions
 import constraints
 
 s = scene.Scene()
 
 def v(x):
-    return variables.Variable(x)
+    return expressions.Variable(x)
 
 a = primitives.Point(v(0), v(2))
 b = primitives.Point(v(1), v(0))
