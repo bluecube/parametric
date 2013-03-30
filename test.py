@@ -4,6 +4,9 @@ import scene
 import primitives
 import expressions
 import constraints
+import properties
+
+import math
 
 s = scene.Scene()
 
@@ -23,9 +26,9 @@ s.add_primitive(l2)
 s.add_primitive(l3)
 
 s.add_constraint(constraints.Equal(l1.length, 2))
-s.add_constraint(constraints.Equal(l2.length, 3))
-s.add_constraint(constraints.Equal(l3.length, 2))
-s.add_constraint(constraints.Horizontal(l3))
+s.add_constraint(constraints.Equal(l3.length, 3))
+s.add_constraint(constraints.Equal(properties.angle(l1, l3), math.radians(30)))
+s.add_constraint(constraints.Horizontal(l1))
 
 s.solve()
 

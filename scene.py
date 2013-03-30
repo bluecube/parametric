@@ -23,9 +23,6 @@ class Scene:
                 variables.append(var)
 
         for i in range(11):
-            with open('/tmp/test{}.svg'.format(i), 'w') as fp:
-                self.export_svg(fp)
-
             jacobian = numpy.matrix(numpy.zeros(
                 shape=(len(self._constraints), len(variables))))
             for constraint_id, constraint in enumerate(self._constraints):

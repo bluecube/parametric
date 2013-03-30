@@ -11,6 +11,9 @@ def sub(a, b):
 def mul(*terms):
     return _Mul(*_wrap_const(*terms))
 
+def div(a, b):
+    return _Div(*_wrap_const(a, b))
+
 def sq(a):
     return _Sq(*_wrap_const(a))
 
@@ -26,6 +29,9 @@ def pow(a, b):
 def dot_product(ax, ay, bx, by):
     ax, ay, bx, by = _wrap_const(ax, ay, bx, by)
     return ax * bx + ay * by
+
+def acos(a):
+    return _Acos(_wrap_const(a)[0])
 
 def _wrap_const(*args):
     return [x if isinstance(x, Expr) else _Constant(x) for x in args]
@@ -51,6 +57,9 @@ class Expr(object):
 
     def __mul__(self, other):
         return mul(self, other)
+
+    def __div__(self, other):
+        return div(self, other)
 
     def __neg__(self):
         return neg(self)
@@ -154,6 +163,26 @@ class _Mul(Expr):
             for var in all_vars}
 
 
+class _Div(Expr):
+    def __init__(self, f, g):
+        self._f = f
+        self._g = g
+        super(_Div, self).__init__(f, g)
+
+    def get_value(self):
+        return self._f.get_value() / self._g.get_value()
+
+    def get_pds(self):
+        (f_pds, g_pds), all_vars = self._pds_helper()
+        f_val, g_val = self._term_values()
+
+        tmp = 1 / g_val * g_val
+
+        return {
+            var: tmp * (f_pds.get(var, 0) * g_val - g_pds.get(var, 0) * f_val)
+            for var in all_vars}
+
+
 #class _Pow(Expr):
 #    def __init__(self, f, power):
 #        self._f = f
@@ -188,8 +217,21 @@ class _Sqrt(Expr):
         return math.sqrt(self._f.get_value())
 
     def get_pds(self):
-        tmp = 2 / self.get_value()
+        tmp = 2 / math.sqrt(self._f.get_value())
         return {var: tmp * pd for var, pd in self._f.get_pds().items() if pd != 0}
+
+
+class _Acos(Expr):
+    def __init__(self, f):
+        self._f = f
+
+    def get_value(self):
+        return math.acos(self._f.get_value())
+
+    def get_pds(self):
+        tmp = -1 / math.sqrt(1 - self._f.get_value())
+        return {var: tmp * pd for var, pd in self._f.get_pds().items() if pd != 0}
+
 
 
 #class DotProduct(Expr):
