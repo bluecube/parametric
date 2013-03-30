@@ -1,3 +1,5 @@
+from __future__ import division
+
 import functools
 import operator
 import math
@@ -38,6 +40,7 @@ def _wrap_const(*args):
 
 def _multiply(iterable):
     return functools.reduce(operator.mul, iterable)
+
 
 class Expr(object):
     def __init__(self, *terms):
@@ -208,7 +211,7 @@ class _Div(Expr):
         (f_pds, g_pds), all_vars = self._pds_helper()
         f_val, g_val = self._term_values()
 
-        tmp = 1 / g_val * g_val
+        tmp = 1 / (g_val * g_val)
 
         return {
             var: tmp * (f_pds.get(var, 0) * g_val - g_pds.get(var, 0) * f_val)
@@ -218,22 +221,25 @@ class _Div(Expr):
         return self._str_infix_helper("/")
 
 
-#class _Pow(Expr):
-#    def __init__(self, f, power):
-#        self._f = f
-#        self._power = power
-#
-#    def get_value(self):
-#        return self._f.get_value() ** self._power
-#
-#    def get_pds(self):
-#        tmp = (self._power) * self._f.get_value() ** (self.power - 1)
-#        return {var: tmp * pd for var, pd in self._f.get_pds()}
+class _Pow(Expr):
+    def __init__(self, f, power):
+        self._f = f
+        self._power = power
 
+    def get_value(self):
+        return self._f.get_value() ** self._power
+
+    def get_pds(self):
+        tmp = (self._power) * self._f.get_value() ** (self._power - 1)
+        return {var: tmp * pd for var, pd in self._f.get_pds().items()}
+
+    def __str__(self):
+        return "(" + str(self._f) + "^" + str(self._power) + ")"
 
 class _Sq(Expr):
     def __init__(self, f):
         self._f = f
+        super(_Sq, self).__init__(f)
 
     def get_value(self):
         val = self._f.get_value()
@@ -250,12 +256,13 @@ class _Sq(Expr):
 class _Sqrt(Expr):
     def __init__(self, f):
         self._f = f
+        super(_Sqrt, self).__init__(f)
 
     def get_value(self):
         return math.sqrt(self._f.get_value())
 
     def get_pds(self):
-        tmp = 2 / math.sqrt(self._f.get_value())
+        tmp = 1 / (2 * math.sqrt(self._f.get_value()))
         return {var: tmp * pd for var, pd in self._f.get_pds().items() if pd != 0}
 
     def __str__(self):
@@ -265,12 +272,14 @@ class _Sqrt(Expr):
 class _Acos(Expr):
     def __init__(self, f):
         self._f = f
+        super(_Acos, self).__init__(f)
 
     def get_value(self):
         return math.acos(self._f.get_value())
 
     def get_pds(self):
-        tmp = -1 / math.sqrt(1 - self._f.get_value())
+        f_value = self._f.get_value()
+        tmp = -1 / math.sqrt(1 - f_value * f_value)
         return {var: tmp * pd for var, pd in self._f.get_pds().items() if pd != 0}
 
     def __str__(self):
