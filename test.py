@@ -7,27 +7,25 @@ import constraints
 
 s = scene.Scene()
 
-a = primitives.Point(0, 2)
-b = primitives.Point(1, 0)
-c = primitives.Point(3, 3)
+def v(x):
+    return variables.Variable(x)
+
+a = primitives.Point(v(0), v(2))
+b = primitives.Point(v(1), v(0))
+c = primitives.Point(v(3), v(3))
 
 l1 = primitives.LineSegment(a, b)
 l2 = primitives.LineSegment(b, c)
 l3 = primitives.LineSegment(c, a)
 
-c1 = constraints.FixedLength([l1], [2])
-c2 = constraints.FixedLength([l2], [3])
-c3 = constraints.FixedLength([l3], [2])
-c4 = constraints.Horizontal([l3])
-
 s.add_primitive(l1)
 s.add_primitive(l2)
 s.add_primitive(l3)
 
-s.add_constraint(c1)
-s.add_constraint(c2)
-s.add_constraint(c3)
-s.add_constraint(c4)
+s.add_constraint(constraints.Equal(l1.length, 2))
+s.add_constraint(constraints.Equal(l2.length, 3))
+s.add_constraint(constraints.Equal(l3.length, 2))
+s.add_constraint(constraints.Horizontal(l3))
 
 s.solve()
 

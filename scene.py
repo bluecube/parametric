@@ -10,7 +10,6 @@ class Scene:
 
     def add_constraint(self, constraint):
         self._constraints.append(constraint)
-        constraint.update()
 
     def solve(self):
         pds = {}
@@ -23,7 +22,10 @@ class Scene:
                 variables_map[var] = len(variables)
                 variables.append(var)
 
-        for i in range(5):
+        for i in range(11):
+            with open('/tmp/test{}.svg'.format(i), 'w') as fp:
+                self.export_svg(fp)
+
             jacobian = numpy.matrix(numpy.zeros(
                 shape=(len(self._constraints), len(variables))))
             for constraint_id, constraint in enumerate(self._constraints):
@@ -38,7 +40,7 @@ class Scene:
             corrections = numpy.linalg.pinv(jacobian) * errors.T
 
             for var, correction in zip(variables, corrections.flat):
-                var.value -= correction
+                var.update_value(-correction)
 
     def export_svg(self, fp, scale = 100):
         fp.write("""<svg xmlns="http://www.w3.org/2000/svg">

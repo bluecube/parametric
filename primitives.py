@@ -17,13 +17,13 @@ class Primitive(drawables.Drawable):
 
 class Point(Primitive):
     def __init__(self, x, y):
-        self.x = variables.var(x)
-        self.y = variables.var(y)
+        self.x = x
+        self.y = y
         super(Point, self).__init__([], [self.x, self.y])
 
     def export_svg(self, fp, scale):
-        x = self.x.value * scale
-        y = self.y.value * scale
+        x = float(self.x) * scale
+        y = float(self.y) * scale
         w = 5
 
         fp.write('<rect x="{}" y="{}" width="{}" height="{}" class="cp" />\n'.format(
@@ -35,12 +35,17 @@ class LineSegment(Primitive):
     def __init__(self, p1, p2):
         self.p1 = p1
         self.p2 = p2
+
+        vx = variables.sub(p1.x, p2.x)
+        vy = variables.sub(p1.y, p2.y)
+        self.length = variables.sqrt(variables.dot_product(vx, vy, vx, vy))
+
         super(LineSegment, self).__init__([p1, p2], [])
 
     def export_svg(self, fp, scale):
         fp.write('<line x1="{}" y1="{}" x2="{}" y2="{}" class="primitives" />\n'.format(
-            self.p1.x.value * scale, self.p1.y.value * scale,
-            self.p2.x.value * scale, self.p2.y.value * scale))
+            float(self.p1.x) * scale, float(self.p1.y) * scale,
+            float(self.p2.x) * scale, float(self.p2.y) * scale))
         super(LineSegment, self).export_svg(fp, scale)
 
 
