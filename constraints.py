@@ -22,20 +22,27 @@ class Constraint:
         relevant variables."""
         raise NotImplementedError()
 
+    def get_epsilon(self):
+        raise NotImplementedError()
+
     def __str__(self):
         raise NotImplementedError()
 
 class _Equal(Constraint):
-    def __init__(self, a, b):
+    def __init__(self, a, b, epsilon = 1e-5):
         self._a = a
         self._b = b
         self._expr = expressions.sub(a, b)
+        self._epsilon = epsilon
 
     def get_error(self):
         return self._expr.get_value()
 
     def get_error_pds(self):
         return self._expr.get_pds()
+
+    def get_epsilon(self):
+        return self._epsilon
 
     def __str__(self):
         return str(self._a) + " = " + str(self._b)

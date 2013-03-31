@@ -11,18 +11,25 @@ class Scene:
     def add_constraint(self, constraint):
         self._constraints.append(constraint)
 
-    def solve(self):
+    def solve(self, max_steps = 50):
         pds = {}
         variables_map = {}
 
         variables = []
+        epsilons = []
 
         for constraint in self._constraints:
             for var in constraint.get_error_pds():
                 variables_map[var] = len(variables)
                 variables.append(var)
+            epsilons.append(constraint.get_epsilon())
 
-        for i in range(11):
+        for i in range(max_steps):
+            errors = [constraint.get_error() for constraint in self._constraints]
+
+            if all(abs(error) < epsilon for error, epsilon in zip(errors, epsilons)):
+                return True
+
             jacobian = numpy.matrix(numpy.zeros(
                 shape=(len(self._constraints), len(variables))))
             for constraint_id, constraint in enumerate(self._constraints):
@@ -31,13 +38,14 @@ class Scene:
 
                     jacobian[constraint_id, var_id] += pd
 
-            print([constraint.get_error() for constraint in self._constraints])
-            errors = numpy.matrix([constraint.get_error() for constraint in self._constraints])
+            errors = numpy.matrix(errors)
 
             corrections = numpy.linalg.pinv(jacobian) * errors.T
 
             for var, correction in zip(variables, corrections.flat):
                 var.update_value(-correction)
+
+        return False
 
     def export_svg(self, fp, scale = 100):
         fp.write("""<svg xmlns="http://www.w3.org/2000/svg">

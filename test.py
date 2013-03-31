@@ -26,7 +26,7 @@ s.add_constraint(constraints.equal(l3.length, 3))
 s.add_constraint(constraints.equal(properties.angle(l1, l3), math.radians(-30)))
 s.add_constraint(constraints.horizontal(l1))
 
-s.solve()
+print(s.solve())
 
 with open("/tmp/test.svg", "w") as fp:
     s.export_svg(fp, 100)
