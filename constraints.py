@@ -1,5 +1,14 @@
 import expressions
 
+def equal(a, b):
+    return _Equal(a, b)
+
+def vertical(line):
+    return _Equal(line.p1.x, line.p2.x)
+
+def horizontal(line):
+    return _Equal(line.p1.y, line.p2.y)
+
 class Constraint:
     def get_error(self):
         """ Return the current error of this constraint (based on values of
@@ -13,9 +22,13 @@ class Constraint:
         relevant variables."""
         raise NotImplementedError()
 
+    def __str__(self):
+        raise NotImplementedError()
 
-class Equal(Constraint):
+class _Equal(Constraint):
     def __init__(self, a, b):
+        self._a = a
+        self._b = b
         self._expr = expressions.sub(a, b)
 
     def get_error(self):
@@ -24,34 +37,9 @@ class Equal(Constraint):
     def get_error_pds(self):
         return self._expr.get_pds()
 
+    def __str__(self):
+        return str(self._a) + " = " + str(self._b)
 
-class Vertical(Constraint):
-    def __init__(self, line):
-        self._x1 = line.p1.x
-        self._x2 = line.p2.x
-
-    def get_error(self):
-        return self._x1.get_value() - self._x2.get_value()
-
-    def get_error_pds(self):
-        return {
-            self._x1: 1,
-            self._x2: -1
-            }
-
-class Horizontal(Constraint):
-    def __init__(self, line):
-        self._y1 = line.p1.y
-        self._y2 = line.p2.y
-
-    def get_error(self):
-        return self._y1.get_value() - self._y2.get_value()
-
-    def get_error_pds(self):
-        return {
-            self._y1: 1,
-            self._y2: -1
-            }
 
 #class EqualRadius(Constraint):
 #    def __init__(self, *primitives):
