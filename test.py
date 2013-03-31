@@ -2,7 +2,6 @@
 
 import scene
 import primitives
-import expressions
 import constraints
 import properties
 
@@ -10,12 +9,9 @@ import math
 
 s = scene.Scene()
 
-def v(x, *args, **kwargs):
-    return expressions.Variable(x, *args, **kwargs)
-
-a = primitives.Point(v(0, 'ax'), v(2, 'ay'))
-b = primitives.Point(v(1, 'bx'), v(0, 'by'))
-c = primitives.Point(v(3, 'cx'), v(3, 'cy'))
+a = primitives.Point.fresh_variables(0, 2, 'A')
+b = primitives.Point.fresh_variables(1, 0, 'B')
+c = primitives.Point.fresh_variables(3, 3, 'C')
 
 l1 = primitives.LineSegment(a, b)
 l2 = primitives.LineSegment(b, c)

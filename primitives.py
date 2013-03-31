@@ -16,10 +16,23 @@ class Primitive(drawables.Drawable):
 
 
 class Point(Primitive):
+    _auto_naming_counter = 1
+
     def __init__(self, x, y):
         self.x = x
         self.y = y
         super(Point, self).__init__([], [self.x, self.y])
+
+    @classmethod
+    def fresh_variables(cls, x, y, name=None):
+        """ Return a new point with fresh variables as coordinates.
+        Generates user friendly names for the variables. """
+        if name is None:
+            name = "p" + str(self._auto_naming_counter)
+            self.__class__._auto_naming_counter += 1
+
+        return cls(expressions.Variable(x, name + "x"),
+                   expressions.Variable(y, name + "y"))
 
     def export_svg(self, fp, scale):
         x = float(self.x) * scale
