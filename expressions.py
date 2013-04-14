@@ -17,16 +17,22 @@ def div(a, b):
     return _Div(*_wrap_const(a, b))
 
 def sq(a):
-    return _Sq(*_wrap_const(a))
+    return pow(a, 2)
 
 def neg(a):
     return _Sub(_Constant(0), _wrap_const(a)[0])
 
 def sqrt(a):
-    return _Sqrt(*_wrap_const(a))
+    return pow(a, 1/2)
 
 def pow(a, b):
-    return _Pow(_wrap_const(a)[0], b)
+    a = _wrap_const(a)[0]
+    if b == 2:
+        return _Sq(a)
+    if b == 1/2:
+        return _Sqrt(a)
+    else:
+        return _Pow(a, b)
 
 def dot_product(ax, ay, bx, by):
     ax, ay, bx, by = _wrap_const(ax, ay, bx, by)
