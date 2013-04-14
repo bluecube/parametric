@@ -17,8 +17,10 @@ def test1():
 
 def check_pds(expr, variables):
     epsilon = 0.0001
+    print()
+
     for var in variables:
-        for var2, val in sorted(variables.items()):
+        for var2, val in variables.items():
             print(str(var2) + " = " + str(val))
             var2.set_value(val)
 
