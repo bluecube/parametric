@@ -42,7 +42,7 @@ def is_constant(expr):
     return isinstance(expr, _Constant)
 
 
-class Expr(object):
+class Expr:
     """ Abstract expression object. """
     @classmethod
     def make_optimized(cls, *terms):
