@@ -4,18 +4,6 @@ import functools
 import operator
 import math
 
-def diff(expression, variable):
-    """ Return partial derivative wrt to given variable as an expression """
-    return expression._diff(variable)
-
-def numeric_diffs(expression):
-    """ Return a dictionary of variable: partial derivative """
-    return {var: expression._diff(var).get_value() for var in expression._variables()}
-
-def variables(expression):
-    """ Return a set of variables appearing in this expression """
-    return _wrap_const(expression)._variables()
-
 def add(*terms):
     return _Add.make_optimized(*terms)
 
@@ -41,7 +29,7 @@ def sqrt(a):
     return pow(a, 1/2)
 
 def pow(a, b):
-    # The specialized subclasses of pow will be created by _Pow.optimize if necessary
+    # The specialized subclasses of pow will be created by _Pow._optimize if necessary
     return _Pow.make_optimized(a, b)
 
 def dot_product(ax, ay, bx, by):
@@ -66,14 +54,14 @@ class Expr(object):
             # There are only constants -- unleash the constant wrapping
             return _Constant(cls(*terms).get_value())
 
-        optimized = cls.optimize(*terms)
+        optimized = cls._optimize(*terms)
         if optimized is not None:
             return optimized
         else:
             return cls(*terms)
 
     @classmethod
-    def optimize(cls, *terms):
+    def _optimize(cls, *terms):
         """ A possibility to perform specific optimalization steps.
         Returns None, if no changes to the output are to be performed, or
         an expression which should be returned instead of a new instance of this
@@ -82,20 +70,35 @@ class Expr(object):
         cls unless this method returns not None. """
         return None
 
-    def __init__(self, *terms):
-        self._terms = terms
-
     def get_value(self):
         raise NotImplementedError()
 
-    def _variables(self):
-        ret = set()
-        for term in self._terms:
-            ret.update(term._variables())
-        return ret
+    def diff(self, variable):
+        """ Return partial derivative of the expression wrt the variable as an expression.
+        Caches the derivatives. """
+        if variable not in self._diffs:
+            self._diffs[variable] = self._diff(variable)
+        return self._diffs[variable]
+
+    def diff_values(self):
+        """ Return a dictionary with values of partial derivatives,
+        keys are variables, values are derivatives wrt the variable. """
+        return {variable: self.diff(variable).get_value()
+                for variable in self._variables}
+
+    def variables(self):
+        return self._variables
+
+    def __init__(self, *terms):
+        self._terms = terms
+        self._diffs = {}
+        self._variables = set()
+        for term in terms:
+            print(term, term._variables)
+            self._variables.update(term._variables)
 
     def _diff(self, variable):
-        """ Return partial derivative of the expression wrt the variable as an expression """
+        """ Internal. Return partial derivative of the expression wrt the variable as an expression """
         raise NotImplementedError()
 
     def __add__(self, other):
@@ -183,7 +186,7 @@ class _Comutative(Expr):
              # As the version with non-comutative expressions
             return terms[0]
 
-        optimized = cls.optimize(*terms)
+        optimized = cls._optimize(*terms)
         if optimized is not None:
             return optimized
         else:
@@ -239,6 +242,8 @@ class Variable(Expr):
     _auto_naming_counter = 1
 
     def __init__(self, value, name=None):
+        super().__init__()
+
         self._value = value
 
         if name:
@@ -247,10 +252,7 @@ class Variable(Expr):
             self._name = "var" + str(self._auto_naming_counter)
             self.__class__._auto_naming_counter += 1
 
-        super().__init__()
-
-    def _variables(self):
-        return {self}
+        self._variables = {self}
 
     def get_value(self):
         return self._value
@@ -302,7 +304,7 @@ class _Add(_Comutative):
 
 class _Neg(Expr):
     @classmethod
-    def optimize(cls, f):
+    def _optimize(cls, f):
         if isinstance(f, cls):
             return f._f
         elif isinstance(f, _Mul):
@@ -348,7 +350,7 @@ class _Mul(_Comutative):
 
 class _Pow(Expr):
     @classmethod
-    def optimize(cls, f, power):
+    def _optimize(cls, f, power):
         if isinstance(f, _Pow):
             return pow(f._f, f._power * power)
         elif power.get_value() == 0:

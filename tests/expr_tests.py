@@ -9,7 +9,8 @@ def test1():
 
     nose.tools.assert_equals(expr.get_value(), 8)
 
-    pds = e.numeric_diffs(expr)
+    pds = expr.diff_values()
+    print(pds)
     nose.tools.assert_equals(set(pds.keys()), {x, y})
     nose.tools.assert_equals(pds[x], 1)
     nose.tools.assert_equals(pds[y], -1)
@@ -25,7 +26,7 @@ def check_pds(expr, variables):
             var2.set_value(val)
 
 
-        pd = e.diff(expr, var)
+        pd = expr.diff(var)
         pd_value = pd.get_value()
 
         var.update_value(-epsilon)
@@ -45,7 +46,7 @@ def pds_test():
     y = e.Variable(5, "y")
     z = e.Variable(5, "z")
 
-    check_pds(x, {x: 10})
+    check_pds(x, {x: 10, y:4})
     check_pds(e.sq(x) + e.sqrt(y) + z, {x: 0.6, y: 10, z: 3})
     check_pds(x - y, {x: 0.6, y: 10})
     check_pds(x * e.pow(y, 4) * z, {x: 0.6, y: 10, z: 3})
