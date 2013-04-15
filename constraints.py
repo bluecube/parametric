@@ -17,9 +17,12 @@ class Constraint:
         The error must be positive!"""
         raise NotImplementedError()
 
-    def get_error_pds(self):
+    def errror_diff_values(self):
         """ Return a dictionary of partial derivative of the error wrt. all
         relevant variables."""
+        raise NotImplementedError()
+
+    def variables(self):
         raise NotImplementedError()
 
     def get_epsilon(self):
@@ -32,14 +35,17 @@ class _Equal(Constraint):
     def __init__(self, a, b, epsilon = 1e-5):
         self._a = a
         self._b = b
-        self._expr = expressions.sub(a, b)
+        self._expr = b - a
         self._epsilon = epsilon
 
     def get_error(self):
         return self._expr.get_value()
 
-    def get_error_pds(self):
-        return self._expr.get_pds()
+    def error_diff_values(self):
+        return self._expr.diff_values()
+
+    def variables(self):
+        return self._expr.variables()
 
     def get_epsilon(self):
         return self._epsilon

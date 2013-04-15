@@ -94,7 +94,6 @@ class Expr:
         self._diffs = {}
         self._variables = set()
         for term in terms:
-            print(term, term._variables)
             self._variables.update(term._variables)
 
     def _diff(self, variable):

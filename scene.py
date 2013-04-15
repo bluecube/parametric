@@ -19,7 +19,7 @@ class Scene:
         epsilons = []
 
         for constraint in self._constraints:
-            for var in constraint.get_error_pds():
+            for var in constraint.variables():
                 variables_map[var] = len(variables)
                 variables.append(var)
             epsilons.append(constraint.get_epsilon())
@@ -33,7 +33,7 @@ class Scene:
             jacobian = numpy.matrix(numpy.zeros(
                 shape=(len(self._constraints), len(variables))))
             for constraint_id, constraint in enumerate(self._constraints):
-                for var, pd in constraint.get_error_pds().items():
+                for var, pd in constraint.error_diff_values().items():
                     var_id = variables_map[var]
 
                     jacobian[constraint_id, var_id] += pd
