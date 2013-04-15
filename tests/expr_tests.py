@@ -57,3 +57,29 @@ def pds_test():
     check_pds(e.pow(x, 5), {x: 0.6})
     check_pds(e.acos(x), {x: 0.6})
 
+
+def check_equal_structure(a, b):
+    nose.tools.assert_equals(a.__class__, b.__class__)
+    nose.tools.assert_equals(len(a._terms), len(b._terms))
+
+    for x, y in zip(a._terms, b._terms):
+        check_equal_structure(x, y)
+
+def simplification_test():
+    x = e.Variable(5, "x")
+    y = e.Variable(5, "y")
+    z = e.Variable(5, "z")
+    zero = e._Constant(0)
+    one = e._Constant(1)
+
+    check_equal_structure(x * y * z, e.mul(x, y, z))
+
+    check_equal_structure(e._Constant(1) * 2 * 3, e._Constant(6))
+    check_equal_structure(0 * x, zero)
+    check_equal_structure(x * 0, zero)
+    check_equal_structure(x * 1 * y * z, x * y * z)
+    check_equal_structure(x * 1 * 2 * 3, x * 6)
+
+    check_equal_structure(0 + x, x)
+    check_equal_structure(x + 0, x)
+    check_equal_structure(x + 1 + 2 + 3, x + 6)
