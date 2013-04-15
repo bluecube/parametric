@@ -83,3 +83,7 @@ def simplification_test():
     check_equal_structure(0 + x, x)
     check_equal_structure(x + 0, x)
     check_equal_structure(x + 1 + 2 + 3, x + 6)
+
+    check_equal_structure(e.neg(2 * x), -2 * x)
+    check_equal_structure(e.neg(e.neg(x)), x)
+    check_equal_structure(e.inv(e.inv(x)), x)

@@ -32,7 +32,7 @@ def div(a, b):
     return a * inv(b)
 
 def inv(a):
-    return _Inverse.make_optimized(a)
+    return pow(a, -1)
 
 def sq(a):
     return pow(a, 2)
@@ -41,12 +41,8 @@ def sqrt(a):
     return pow(a, 1/2)
 
 def pow(a, b):
-    if b == 2:
-        return _Sq.make_optimized(a)
-    if b == 1/2:
-        return _Sqrt.make_optimized(a)
-    else:
-        return _Pow.make_optimized(a, b)
+    # The specialized subclasses of pow will be created by _Pow.optimize if necessary
+    return _Pow.make_optimized(a, b)
 
 def dot_product(ax, ay, bx, by):
     return add(mul(ax, bx), mul(ay, by))
@@ -65,13 +61,26 @@ class Expr(object):
         """ Create a new instance or some optimized equivalent expression.
         Handles constant folding. """
         terms, count = cls._wrap_const(terms)
-        instance = cls(*terms)
 
         if count == 0:
-            # There are only constants -- wrap this
-            return _Constant(instance.get_value())
+            # There are only constants -- unleash the constant wrapping
+            return _Constant(cls(*terms).get_value())
+
+        optimized = cls.optimize(*terms)
+        if optimized is not None:
+            return optimized
         else:
-            return instance
+            return cls(*terms)
+
+    @classmethod
+    def optimize(cls, *terms):
+        """ A possibility to perform specific optimalization steps.
+        Returns None, if no changes to the output are to be performed, or
+        an expression which should be returned instead of a new instance of this
+        object.
+        Terms are completely processed and will be passed to the constructor of
+        cls unless this method returns not None. """
+        return None
 
     def __init__(self, *terms):
         self._terms = terms
@@ -170,9 +179,15 @@ class _Comutative(Expr):
             terms.append(const_instance)
 
         if len(terms) == 1:
+             # This handles constant wrapping, although not as obviously
+             # As the version with non-comutative expressions
             return terms[0]
 
-        return cls(*terms)
+        optimized = cls.optimize(*terms)
+        if optimized is not None:
+            return optimized
+        else:
+            return cls(*terms)
 
     def __init__(self, *terms):
         super().__init__(*terms)
@@ -286,6 +301,15 @@ class _Add(_Comutative):
 
 
 class _Neg(Expr):
+    @classmethod
+    def optimize(cls, f):
+        if isinstance(f, cls):
+            return f._f
+        elif isinstance(f, _Mul):
+            return _Constant(-1) * f
+        else:
+            return None
+
     def __init__(self, f):
         self._f = f
         super().__init__(f)
@@ -323,6 +347,23 @@ class _Mul(_Comutative):
 
 
 class _Pow(Expr):
+    @classmethod
+    def optimize(cls, f, power):
+        if isinstance(f, _Pow):
+            return pow(f._f, f._power * power)
+        elif power.get_value() == 0:
+            return _Constant(1)
+        elif power.get_value() == 1:
+            return f
+        elif power.get_value() == -1:
+            return _Inverse(f)
+        elif power.get_value() == 1/2:
+            return _Sqrt(f)
+        elif power.get_value() == 2:
+            return _Sq(f)
+        else:
+            return None
+
     def __init__(self, f, power):
         self._f = f
         self._power = power
