@@ -88,3 +88,6 @@ def simplification_test():
     check_equal_structure(e.neg(2 * x), -2 * x)
     check_equal_structure(e.neg(e.neg(x)), x)
     check_equal_structure(e.inv(e.inv(x)), x)
+
+    check_equal_structure(x * x, e.sq(x))
+    check_equal_structure(x * e.inv(x), e._Constant(1))

@@ -329,6 +329,24 @@ class _Mul(_Comutative):
     neutral_element = 1
     absorbing_element = 0
 
+    @classmethod
+    def _optimize(cls, *terms):
+        powers = {}
+        for term in terms:
+            if isinstance(term, _Pow):
+                power = term._power.get_value()
+                term = term._f
+            else:
+                power = 1
+
+            power += powers.get(term, 0)
+            powers[term] = power
+
+        if len(powers) == len(terms):
+            return None
+
+        return mul(*[pow(term, power) for term, power in powers.items()])
+
     def get_value(self):
         return functools.reduce(operator.mul, [term.get_value() for term in self._terms], 1)
 
