@@ -20,19 +20,22 @@ def add(*terms):
     return _Add.make_optimized(*terms)
 
 def sub(a, b):
-    return _Sub.make_optimized(a, b)
+    return a + neg(b)
+
+def neg(a):
+    return _Neg.make_optimized(a)
 
 def mul(*terms):
     return _Mul.make_optimized(*terms)
 
 def div(a, b):
-    return _Div.make_optimized(a, b)
+    return a * inv(b)
+
+def inv(a):
+    return _Inverse.make_optimized(a)
 
 def sq(a):
     return pow(a, 2)
-
-def neg(a):
-    return _Sub.make_optimized(0, a)
 
 def sqrt(a):
     return pow(a, 1/2)
@@ -282,20 +285,19 @@ class _Add(_Comutative):
         return self._str_infix_helper("+")
 
 
-class _Sub(Expr):
-    def __init__(self, f, g):
+class _Neg(Expr):
+    def __init__(self, f):
         self._f = f
-        self._g = g
-        super().__init__(f, g)
+        super().__init__(f)
 
     def get_value(self):
-        return self._f.get_value() - self._g.get_value()
+        return -self._f.get_value()
 
     def _diff(self, var):
-        return self._f._diff(var) - self._g._diff(var)
+        return -self._f._diff(var)
 
     def __str__(self):
-        return self._str_infix_helper("-")
+        return self._str_func_helper("-")
 
 
 class _Mul(_Comutative):
@@ -318,24 +320,6 @@ class _Mul(_Comutative):
 
     def __str__(self):
         return self._str_infix_helper("*")
-
-
-class _Div(Expr):
-    def __init__(self, f, g):
-        self._f = f
-        self._g = g
-        super().__init__(f, g)
-
-    def get_value(self):
-        return self._f.get_value() / self._g.get_value()
-
-    def _diff(self, var):
-        g_squared = self._g * self._g
-        return (self._f._diff(var) * self._g -
-                self._f * self._g._diff(var)) / ( self._g * self._g)
-
-    def __str__(self):
-        return self._str_infix_helper("/")
 
 
 class _Pow(Expr):
@@ -383,6 +367,17 @@ class _Sqrt(_Pow):
 
     def __str__(self):
         return self._str_func_helper("sqrt", [self._f])
+
+
+class _Inverse(_Pow):
+    def __init__(self, f):
+        super().__init__(f, _Constant(-1))
+
+    def get_value(self):
+        return 1 / self._f.get_value()
+
+    def _diff(self, var):
+        return -self._f._diff(var) / sq(self._f)
 
 
 class _Acos(Expr):
