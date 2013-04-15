@@ -119,11 +119,19 @@ class Expr(object):
     def __str__(self):
         raise NotImplementedError()
 
-    def _str_infix_helper(self, op):
-        return "(" + (" " + op + " ").join(str(term) for term in self._terms) + ")"
+    def _str_infix_helper(self, op, alternative_terms = None):
+        if alternative_terms is None:
+            terms = self._terms
+        else:
+            terms = alternative_terms
+        return "(" + (" " + op + " ").join(str(term) for term in terms) + ")"
 
-    def _str_func_helper(self, func):
-        return func + "(" + ", ".join( str(term) for term in self._terms) + ")"
+    def _str_func_helper(self, func, alternative_terms = None):
+        if alternative_terms is None:
+            terms = self._terms
+        else:
+            terms = alternative_terms
+        return func + "(" + ", ".join( str(term) for term in terms) + ")"
 
     @staticmethod
     def _wrap_const(terms):
@@ -359,7 +367,7 @@ class _Sq(_Pow):
         return _Constant(2) * self._f * self._f._diff(var)
 
     def __str__(self):
-        return self._str_func_helper("sq")
+        return self._str_func_helper("sq", [self._f])
 
 
 class _Sqrt(_Pow):
@@ -374,7 +382,7 @@ class _Sqrt(_Pow):
         return _Constant(1/2) * self._f._diff(var) / sqrt(self._f)
 
     def __str__(self):
-        return self._str_func_helper("sqrt")
+        return self._str_func_helper("sqrt", [self._f])
 
 
 class _Acos(Expr):
