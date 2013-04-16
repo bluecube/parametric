@@ -17,6 +17,9 @@ class Constraint:
         The error must be positive!"""
         raise NotImplementedError()
 
+    def diff(self, variable):
+        raise NotImplementedError()
+
     def errror_diff_values(self):
         """ Return a dictionary of partial derivative of the error wrt. all
         relevant variables."""
@@ -40,6 +43,9 @@ class _Equal(Constraint):
 
     def get_error(self):
         return self._expr.get_value()
+
+    def diff(self, variable):
+        return self._expr.diff(variable)
 
     def error_diff_values(self):
         return self._expr.diff_values()

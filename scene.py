@@ -20,6 +20,7 @@ class Scene:
 
         for constraint in self._constraints:
             for var in constraint.variables():
+                print(constraint.diff(var))
                 variables_map[var] = len(variables)
                 variables.append(var)
             epsilons.append(constraint.get_epsilon())
