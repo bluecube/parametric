@@ -92,4 +92,5 @@ def simplification_test():
     check_equal_structure(x * e.inv(x), e._Constant(1))
 
     check_equal_structure(x + x, 2 * x)
+    check_equal_structure(x - x, e._Constant(0))
     check_equal_structure(3 * x - x + 8 * x, 10 * x)
