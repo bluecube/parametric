@@ -291,6 +291,34 @@ class _Add(_Comutative):
     neutral_element = 0
     absorbing_element = None
 
+    @classmethod
+    def _optimize(cls, *terms):
+        multiples = {}
+        for term in terms:
+            if isinstance(term, _Mul):
+                multiple = 1
+                for subterm in term._terms:
+                    if is_constant(subterm):
+                        # This work well (I'll overlook the O(N) complexity for now)
+                        # For "proper" multiplications, with at most one merged
+                        # constant. During constant folding this will miss
+                        # some stuff. This, however, doesn't matter as it won't change
+                        # the value.
+                        multiple = subterm.get_value()
+                        term = term / multiple
+                        break
+            else:
+                multiple = 1
+
+            multiple += multiples.get(term, 0)
+            multiples[term] = multiple
+
+        if len(multiples) == len(terms):
+            return None
+
+        return add(*[mul(term, _Constant(multiple))
+                     for term, multiple in multiples.items()])
+
     def get_value(self):
         return math.fsum(x.get_value() for x in self._terms)
 

@@ -10,7 +10,6 @@ def test1():
     nose.tools.assert_equals(expr.get_value(), 8)
 
     pds = expr.diff_values()
-    print(pds)
     nose.tools.assert_equals(set(pds.keys()), {x, y})
     nose.tools.assert_equals(pds[x], 1)
     nose.tools.assert_equals(pds[y], -1)
@@ -91,3 +90,6 @@ def simplification_test():
 
     check_equal_structure(x * x, e.sq(x))
     check_equal_structure(x * e.inv(x), e._Constant(1))
+
+    check_equal_structure(x + x, 2 * x)
+    check_equal_structure(3 * x - x + 8 * x, 10 * x)
