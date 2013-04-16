@@ -11,7 +11,7 @@ def sub(a, b):
     return a + neg(b)
 
 def neg(a):
-    return _Neg.make_optimized(a)
+    return -1 * a
 
 def mul(*terms):
     return _Mul.make_optimized(*terms)
@@ -299,30 +299,6 @@ class _Add(_Comutative):
 
     def __str__(self):
         return self._str_infix_helper("+")
-
-
-class _Neg(Expr):
-    @classmethod
-    def _optimize(cls, f):
-        if isinstance(f, cls):
-            return f._f
-        elif isinstance(f, _Mul):
-            return _Constant(-1) * f
-        else:
-            return None
-
-    def __init__(self, f):
-        self._f = f
-        super().__init__(f)
-
-    def get_value(self):
-        return -self._f.get_value()
-
-    def _diff(self, var):
-        return -self._f._diff(var)
-
-    def __str__(self):
-        return self._str_func_helper("-")
 
 
 class _Mul(_Comutative):
