@@ -4,10 +4,10 @@ def equal(a, b):
     return _Equal(a, b)
 
 def vertical(line):
-    return _Equal(line.p1.x, line.p2.x)
+    return equal(line.p1.x, line.p2.x)
 
 def horizontal(line):
-    return _Equal(line.p1.y, line.p2.y)
+    return equal(line.p1.y, line.p2.y)
 
 class Constraint:
     def get_error(self):

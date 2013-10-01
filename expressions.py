@@ -35,6 +35,9 @@ def pow(a, b):
 def dot_product(ax, ay, bx, by):
     return add(mul(ax, bx), mul(ay, by))
 
+def cos(a):
+    return _Cos.make_optimized(a)
+
 def acos(a):
     return _Acos.make_optimized(a)
 
@@ -44,6 +47,10 @@ def is_constant(expr):
 
 class Expr:
     """ Abstract expression object. """
+
+    # Inverse function for this expression. Used for optimizing constraints (equations)
+    inverse = None
+
     @classmethod
     def make_optimized(cls, *terms):
         """ Create a new instance or some optimized equivalent expression.
@@ -404,6 +411,8 @@ class _Pow(Expr):
         return self._str_infix_helper("**")
 
 class _Sq(_Pow):
+    inverse = sqrt
+
     def __init__(self, f):
         super().__init__(f, _Constant(2))
 
@@ -419,6 +428,8 @@ class _Sq(_Pow):
 
 
 class _Sqrt(_Pow):
+    inverse = sq
+
     def __init__(self, f):
         self._f = f
         super().__init__(f, _Constant(1/2))
@@ -445,6 +456,8 @@ class _Inverse(_Pow):
 
 
 class _Acos(Expr):
+    inverse = cos
+
     def __init__(self, f):
         self._f = f
         super().__init__(f)

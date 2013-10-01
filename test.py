@@ -23,7 +23,7 @@ s.add_primitive(l3)
 
 s.add_constraint(constraints.equal(l1.length, 2))
 s.add_constraint(constraints.equal(l3.length, 3))
-s.add_constraint(constraints.equal(properties.angle(l1, l3), math.radians(-30)))
+s.add_constraint(constraints.equal(properties.angle(l1, l3), math.radians(90)))
 s.add_constraint(constraints.horizontal(l1))
 
 print(s.solve())
