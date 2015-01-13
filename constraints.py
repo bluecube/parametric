@@ -20,7 +20,7 @@ class Constraint:
     def diff(self, variable):
         raise NotImplementedError()
 
-    def errror_diff_values(self):
+    def error_diff_values(self):
         """ Return a dictionary of partial derivative of the error wrt. all
         relevant variables."""
         raise NotImplementedError()
