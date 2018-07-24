@@ -1,33 +1,23 @@
-#!/usr/bin/python3
+import parametric
 
-import scene
-import primitives
-import constraints
-import properties
+angle = 15
+thickness = 5
 
-import math
+s = parametric.Solver()
 
-s = scene.Scene()
+a = parametric.Point(0, 0, fixed=True)
+b = parametric.Point(0, -thickness)
+c = parametric.Point(-thickness, -thickness)
+d = parametric.Point(-thickness, 0)
 
-a = primitives.Point.fresh_variables(0, 2, 'A')
-b = primitives.Point.fresh_variables(1, 0, 'B')
-c = primitives.Point.fresh_variables(3, 3, 'C')
+la = parametric.LineSegment(a, b)
+lb = parametric.LineSegment(b, c)
+lc = parametric.LineSegment(c, d)
+ld = parametric.LineSegment(d, a)
 
-l1 = primitives.LineSegment(a, b)
-l2 = primitives.LineSegment(b, c)
-l3 = primitives.LineSegment(c, a)
-
-s.add_primitive(l1)
-s.add_primitive(l2)
-s.add_primitive(l3)
-
-s.add_constraint(constraints.equal(l1.length, 2))
-s.add_constraint(constraints.equal(l3.length, 3))
-s.add_constraint(constraints.equal(properties.angle(l1, l3), math.radians(90)))
-s.add_constraint(constraints.horizontal(l1))
-
-print(s.solve())
-
-with open("/tmp/test.svg", "w") as fp:
-    s.export_svg(fp, 100)
-
+s.add_constraint(parametric.Angle(la, -90 - angle))
+s.add_constraint(parametric.Perpendicular(la, lb))
+s.add_constraint(parametric.Length(lb, thickness))
+s.add_constraint(parametric.Perpendicular(lc, ld))
+s.add_constraint(parametric.Length(lc, thickness))
+s.add_constraint(parametric.Horizontal(ld.a, ld.b))
