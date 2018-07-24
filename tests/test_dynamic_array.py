@@ -60,8 +60,7 @@ def array():
 
 def test_pop(array):
     l = len(array)
-    array.pop()
-
+    assert array.pop() == l - 1
     assert len(array) == l - 1
     assert list(array) == list(range(l - 1))
 

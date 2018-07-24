@@ -1,7 +1,5 @@
 import numpy
 
-import operator
-
 class DynamicArray:
     """ Dynamic 1D array that supports efficient appends (like array.array) based on numpy (supporting dtypes) """
 
@@ -41,6 +39,8 @@ class DynamicArray:
 
         self.size -= 1
         self._maybe_deflate(self.size)
+
+        return v
 
     def extend(self, values):
         offset = self.size
