@@ -19,7 +19,7 @@ class Variable:
 
 
 class Point:
-    def __init__(self, x = None, y = None, fixed=False):
+    def __init__(self, x=None, y=None, fixed=False):
         self.fixed = fixed
         self.x = Variable(x, fixed)
         self.y = Variable(y, fixed)
@@ -29,7 +29,7 @@ class Point:
         yield self.y
 
     def get_fixing_constraints(self):
-        yield 
+        yield
 
 
 class LineSegment:

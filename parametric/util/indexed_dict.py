@@ -1,5 +1,6 @@
 import collections
 
+
 class IndexedDict(collections.MutableMapping):
     _marker = object()
 
@@ -11,7 +12,7 @@ class IndexedDict(collections.MutableMapping):
     def clear(self):
         """ Remove all items. """
         self._dict = {}  # key -> (index, value)
-        self._list = [] # index -> (key, value)
+        self._list = []  # index -> (key, value)
 
     def get(self, key=_marker, index=_marker, d=None):
         """ Return value with given key or index.
@@ -101,8 +102,9 @@ class IndexedDict(collections.MutableMapping):
             assert popped_value is popped_value2
             return popped_value, len(self._list), key, popped_value
         else:
-            self._list[index] = self._list[-1]  # Swap the last item onto the deleted spot
-            moved_key, moved_value = self._list.pop()  # Pop the last item from the list
+            # Swap the last item onto the deleted spot and pop the last item from the list
+            self._list[index] = self._list[-1]
+            moved_key, moved_value = self._list.pop()
             self._dict[moved_key] = (index, moved_value)
             return popped_value, index, moved_key, moved_value
 

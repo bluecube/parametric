@@ -1,5 +1,6 @@
 import numpy
 
+
 class DynamicArray:
     """ Dynamic 1D array that supports efficient appends (like array.array) based on numpy (supporting dtypes) """
 
@@ -56,19 +57,19 @@ class DynamicArray:
 
             try:
                 # First try to do numpy slice assignment for speeed
-                self._array[offset:self.size] = values
+                self._array[offset : self.size] = values
             except TypeError:
                 pass
             else:
                 return
 
-            #TODO: Handle objects that report different length than it actualy is
+            # TODO: Handle objects that report different length than it actualy is
             # (list does that). At that point length and size_hint are basically equivalent
             for i, value in enumerate(values, offset):
                 self._array[i] = value
             return
 
-        #TODO: Use size_hint
+        # TODO: Use size_hint
         for value in values:
             self.append(value)
 
@@ -92,7 +93,7 @@ class DynamicArray:
 
     def array(self):
         """ Return a slice of the internal numpy array """
-        return self._array[:self.size]
+        return self._array[: self.size]
 
     def __array__(self, dtype=None):
         """ To match numpy's protocol """
