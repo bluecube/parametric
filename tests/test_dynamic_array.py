@@ -1,4 +1,4 @@
-import parametric.util
+from parametric.util import DynamicArray
 
 import numpy
 import pytest
@@ -7,7 +7,7 @@ import pytest
 @pytest.mark.parametrize("dtype", [None, numpy.int8, bytes, [('big', '>i4'), ('little', '<i4')], int])
 @pytest.mark.parametrize("size_hint", [None, 0, 1, 10, 100])
 def test_construction_empty(dtype, size_hint):
-    da = parametric.util.DynamicArray(dtype=dtype, size_hint=size_hint)
+    da = DynamicArray(dtype=dtype, size_hint=size_hint)
 
     assert len(da) == 0
     with pytest.raises(IndexError):
@@ -17,7 +17,7 @@ def test_construction_empty(dtype, size_hint):
 
 
 def test_append():
-    da = parametric.util.DynamicArray(dtype=int, size_hint=10)
+    da = DynamicArray(dtype=int, size_hint=10)
 
     for i in range(100):
         da.append(97*i % 100)
@@ -39,7 +39,7 @@ class Weirdo:
                                           (Weirdo(), int)])
 @pytest.mark.parametrize("size_hint", [None, 0, 1, 100])
 def test_extend(value, dtype, size_hint):
-    da = parametric.util.DynamicArray(dtype=dtype, size_hint=size_hint)
+    da = DynamicArray(dtype=dtype, size_hint=size_hint)
 
     da.extend(value)
     assert list(da) == list(value)
@@ -48,13 +48,13 @@ def test_extend(value, dtype, size_hint):
 
 
 def test_extend_iterator():
-    da = parametric.util.DynamicArray(dtype=int)
+    da = DynamicArray(dtype=int)
     da.extend(iter(range(5)))
     assert list(da) == list(range(5))
 
 @pytest.fixture
 def array():
-    da = parametric.util.DynamicArray(dtype=int)
+    da = DynamicArray(dtype=int)
     da.extend(range(100))
     return da
 
@@ -95,7 +95,7 @@ def test_indexing_slices(array):
             assert list(array[offset:offset + count]) == list(range(offset, offset + count))
 
 def test_record_dtype():
-    array = parametric.util.DynamicArray(dtype=[("a", numpy.int32), ("b", numpy.float32)])
+    array = DynamicArray(dtype=[("a", numpy.int32), ("b", numpy.float32)])
     for i in range(100):
         array.append((i, i + 0.5))
 
