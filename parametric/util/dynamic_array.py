@@ -14,6 +14,7 @@ class DynamicArray:
         initial_size = self._initial_size if size_hint is None else size_hint
         self._array = numpy.zeros((initial_size,), dtype=dtype)
         self.size = 0
+        self.dtype = dt
 
     def _update_size(self, size, min_size=0):
         self._array.resize(max(3 * size // 2, min_size))

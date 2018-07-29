@@ -8,106 +8,109 @@ from . import util
 
 
 class Solver:
+    _variable_index_dtype = numpy.uint32
+    _number_dtype = numpy.float64
+
     def __init__(self):
-        self._constraints = {}  # Indexed by responsible class, contains _ConstraintBlock instance
-        self._variable_indices = {}  # Indexed by variable, contains index in self._variables array
-        self._variables = []
+        self._variables = util.IndexedDict()  # variable -> set of constraints
+        self._objects = {}  # object -> count
+        self._constraints = {}  # responsible class -> _ConstraintBlock
 
         self.auto_solve = True
 
     def add_constraint(self, constraint):
-        """ Add a strong constraint to the system to be solved.
-        Also adds all variables referenced from the constraint """
+        dtype, parameter_values, variables = self._constraint_parameters(constraint)
 
-        # First number and link in variables
-        for o in constraint.get_objects():
-            for v in o.get_variables():
-                assert (
-                    v not in self._variables
-                    or constraint not in self._variables[v].constraints
-                )
-                self._variables.setdefault(v, set())
-                self._variables[v].constraints.add(constraint)
+        for var in variables:
+            variable_constraints = self._variables.setdefault(v, set())
+            assert constraint not in variable_constraints
+            variable_constraints.add(constraint)
 
-        # Then link in the
         responsible_class = self._get_responsible_class(constraint)
-        if responsible_class not in self._constraints:
-            self._constraints[responsible_class] = _ConstraintBlock()
+        try:
+            block = self._constraints[responsible_class]
+        except KeyError:
+            block = _ConstraintBlock(dtype)
+            constraints_dict[responsible_class] = block
 
-        self.constraints.append(constraint)
-        self.parameter_array.append(constraint.get_parameters(self.solver))
+        assert block.parameter_array.dtype == dtype
+        block.constraints.append(constraint)
+        block.parameter_array.append(parameter_values)
 
-        assert len(self.contains) == len(self.parameter_array)
-
-        assert self._check_state()
+        assert self._assert_internal_state()
         self._auto_solve()
 
     def remove_constraint(self, constraint):
+        _, _, variables = self._constraint_parameters(constraint)
+
+        constraints_to_fix = set()
+
+        for var in variables:
+            variable_constraints = self._variables[var]
+            variable_constraints.remove(constraint)
+            if len(variable_constraints) == 0:
+                _, new_index, moved_var, moved_var_constraints = self._variables.fast_pop(var)
+                constraints_to_fix.update(moved_var_constraints)
+        assert constraint not in constraints_to_fix
+
         responsible_class = self._get_responsible_class(constraint)
-
-        for o in constraint.get_objects():
-            for v in o.get_variables():
-                self._variables.add(v)
-
-        self._constraints[responsible_class].remove_constraint(constraint)
-        if len(self._constraints[responsible_class].constraints) == 0:
+        block = self._constraints[responsible_class]
+        assert constraint in block.constraints
+        if len(block.constraints) == 0:
+            # last constraint of this responsible class
             del self._constraints[responsible_class]
+        else:
+           block.fast_pop(constraint)
 
-        assert self._check_state()
+        for c in constraints_to_fix:
+            responsible_class = self._get_responsible_class(constraint)
+            block = self._constraints[responsible_class]
+
+            dtype, parameter_values, _ = self._constraint_parameters(c)
+            assert block.parameter_array.dtype == dtype
+            index = block.constraints.index(c)
+            block.parameter_array[index] = parameter_values
+
+        assert self._assert_internal_state()
         self._auto_solve()
 
     def solve(self):
-        variables = dict(zip(self._variables, itertools.count()))
-        print(variables)
+        initial = numpy.fromiter(
+            (var.value for var in self._variables),
+            dtype=self._number_dtype,
+            count=len(self._variables)
+        )
+        print(initial)
         return
-        raise NotImplementedError()
 
-    def _check_state(self):
+    def _assert_internal_state(self):
         """ Asserts that the inner state of the solver is ok and everything is
         linked where it should. """
 
-        constraints_from_variables = set()
-        variable_indices = numpy.zeros((len(self._variables),), dtype=bool)
-        for var, (index, var_constraints) in self._variables.items():
-            try:
-                variable_indices[index] = True
-            except IndexError:
-                if index >= len(self._variables):
-                    raise AssertionError("Variable numbering is not continuous")
-                elif index < 0:
-                    raise AssertionError("Negative variable number?")
-                else:
-                    raise
+        self._variables._assert_internal_state()  # I still don't 100% trust IndexedDict :)
 
+        constraints_from_variables = set()
+        for var_constraints in self._variables.values():
             constraints_from_variables.update(var_constraints)
 
-        assert all(variable_indices), "Variable numbering contains duplicates"
-
         for responsible_class, block in self._constraints.items():
-            assert block.responsible_class is responsible_class
-            assert block.solver is self
+            assert constraint in constraints_from_variables
             assert len(block.constraints) == len(block.parameter_array)
             assert len(block.constraints) > 0, "Empty constraint block"
-            for i, constraint in block.constraints:
-                assert block.parameter_array[i] == constraint.get_parameters(self)
-                for o in constraint.get_objects():
-                    for v in o.get_variables():
-                        assert (
-                            v in self._variables
-                        ), "Variable referenced from an added constraint is not in variables list"
-                        assert (
-                            constraint in self._variables[v][1]
-                        ), "Constraint is not linked to its variable"
+            for i, constraint in enumerate(block.constraints):
+                dtype, values, variables = self._constraint_parameters(constraint)
+                assert block.parameter_array.dtype == dtype
+                assert block.parameter_array[i] == values
+                for v in variables:
+                    assert v in self._variables
+                    assert constraint in self._variables[v][1]
 
         for constraint in constraints_from_variables:
             responsible_class = self._get_responsible_class(constraint)
-            assert (
-                constraint in self._constraints[responsible_class].constraints
-            ), "Constraint referenced from variable but not stored in the correct constraint block"
+            assert constraint in self._constraints[responsible_class].constraints
 
-        return (
-            True
-        )  # Returns True only to allow using this method as `assert self._check_state()`
+        # Returns True to allow using this method as `assert self._assert_internal_state()`
+        return True
 
     def _auto_solve(self):
         if self.auto_solve:
@@ -120,6 +123,21 @@ class Solver:
         ret = constraint.__class__
         assert isinstance(constraint, ret)
         return ret
+
+    def _constraint_parameters(self, constraint):
+        dtype = []
+        values = []
+        variables = []
+        for name, value in constraint.get_parameters():
+            if isinstance(value, objects.Variable):
+                dtype.append((name, self._variable_index_dtype))
+                values.append(self._variables.index(x))
+                variables.append(value)
+            else:
+                dtype.append((name, self._number_dtype))
+                values.append(x)
+
+        return dtype, tuple(values), variables
 
 
 class _VariableRecord:
@@ -136,20 +154,15 @@ class _ConstraintBlock:
 
     __slots__ = ("constraints", "parameter_array")
 
-    def __init__(self):
+    def __init__(self, dtype):
         self.constraints = collections_extended.setlist()
-        self.parameter_array = util.DynamicArray(
-            dtype=responsible_class.parameters_dtype
-        )
+        self.parameter_array = util.DynamicArray(dtype=dtype)
 
-    def remove_constraint(constraint):
-        """ Remove constraint from a block.
-        Reorders the constraints. """
+    def fast_pop(self, constraint):
+        """ Swap the deleted constraint to the back and pop """
         index = self.constraints.index(constraint)
-        self.constraints[index] = self.constraints.pop()
-        self.parameter_array[index] = self.parameter_array.pop()
-
-        assert len(self.contains) == len(self.parameter_array)
-
-    def evaluate(self, variable_values):
-        return self.responsible_class.evaluate(variable_values, self.parameter_array)
+        if index != len(self.constraints) - 1:
+            self.constraints[index] = self.constraints[-1]
+            self.parameter_array[index] = self.parameter_array[-1]
+        self.constraints.pop()
+        self.parameter_array.pop()
