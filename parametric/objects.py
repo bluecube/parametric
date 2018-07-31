@@ -31,6 +31,7 @@ class Point:
     def get_stability_constraints(self):
         yield constraints.PointFixed(self)
 
+
 class LineSegment:
     def __init__(self, a, b):
         self.a = a

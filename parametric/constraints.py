@@ -1,5 +1,6 @@
 import numpy
 
+
 class _Constraint:
     @classmethod
     def evaluate(cls, variable_values, parameters):
@@ -22,26 +23,29 @@ class VariableFixed(_Constraint):
     """ Variable is fixed to the current value of the variables.
     This constraint is special in that it is auto generated for every variable and
     used as a soft constraint. """
+
     def __init__(self, variable):
         self.variable = variable
 
     def get_parameters(self):
-        return [('variable', self.variable),
-                ('value', self.variable.value)]
+        return [("variable", self.variable), ("value", self.variable.value)]
 
 
 class Angle(_Constraint):
     """ Line absolute angle """
+
     def __init__(self, line, angle):
         self.line = line
         self.angle = angle
 
     def get_parameters(self):
-        return [('ax', self.line.a.x),
-                ('ay', self.line.a.y),
-                ('bx', self.line.b.x),
-                ('by', self.line.b.y),
-                ('angle', self.angle)]
+        return [
+            ("ax", self.line.a.x),
+            ("ay", self.line.a.y),
+            ("bx", self.line.b.x),
+            ("by", self.line.b.y),
+            ("angle", self.angle),
+        ]
 
 
 class Perpendicular(_Constraint):
@@ -50,14 +54,16 @@ class Perpendicular(_Constraint):
         self.line2 = line2
 
     def get_parameters(self):
-        return [('ax1', self.line1.a.x),
-                ('ay1', self.line1.a.y),
-                ('bx1', self.line1.b.x),
-                ('by1', self.line1.b.y),
-                ('ax2', self.line2.a.x),
-                ('ay2', self.line2.a.y),
-                ('bx2', self.line2.b.x),
-                ('by2', self.line2.b.y)]
+        return [
+            ("ax1", self.line1.a.x),
+            ("ay1", self.line1.a.y),
+            ("bx1", self.line1.b.x),
+            ("by1", self.line1.b.y),
+            ("ax2", self.line2.a.x),
+            ("ay2", self.line2.a.y),
+            ("bx2", self.line2.b.x),
+            ("by2", self.line2.b.y),
+        ]
 
 
 class Length(_Constraint):
@@ -66,11 +72,13 @@ class Length(_Constraint):
         self.length = length
 
     def get_parameters(self):
-        return [('ax', self.line.a.x),
-                ('ay', self.line.a.y),
-                ('bx', self.line.b.x),
-                ('by', self.line.b.y),
-                ('length', self.length)]
+        return [
+            ("ax", self.line.a.x),
+            ("ay", self.line.a.y),
+            ("bx", self.line.b.x),
+            ("by", self.line.b.y),
+            ("length", self.length),
+        ]
 
 
 class VariablesEqual(_Constraint):
@@ -79,8 +87,7 @@ class VariablesEqual(_Constraint):
         self.variable2 = variable2
 
     def get_parameters(self):
-        return [('v1', self.variable1),
-                ('v2', self.variable2)]
+        return [("v1", self.variable1), ("v2", self.variable2)]
 
 
 class Vertical(VariablesEqual):

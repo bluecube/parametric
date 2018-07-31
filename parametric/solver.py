@@ -31,7 +31,9 @@ class Solver:
 
         constraint_parameters = constraint.get_parameters()
         for var in self._constraint_variables(constraint_parameters):
-            variable_constraints = self._variables.setdefault(var, collections_extended.bag())
+            variable_constraints = self._variables.setdefault(
+                var, collections_extended.bag()
+            )
             variable_constraints.add(constraint)
 
         dtype, parameter_values = self._constraint_parameters(constraint_parameters)
@@ -61,7 +63,9 @@ class Solver:
             variable_constraints = self._variables[var]
             variable_constraints.remove(constraint)
             if len(variable_constraints) == 0:
-                _, new_index, moved_var, moved_var_constraints = self._variables.fast_pop(var)
+                _, new_index, moved_var, moved_var_constraints = self._variables.fast_pop(
+                    var
+                )
                 constraints_to_fix.update(moved_var_constraints)
         assert constraint not in constraints_to_fix
 
@@ -69,7 +73,7 @@ class Solver:
             # last constraint of this responsible class
             del self._constraints[responsible_class]
         else:
-           block.fast_pop(constraint)
+            block.fast_pop(constraint)
 
         for c in constraints_to_fix:
             responsible_class = self._get_responsible_class(constraint)
@@ -87,7 +91,7 @@ class Solver:
         initial = numpy.fromiter(
             (float(var) for var in self._variables),
             dtype=self._number_dtype,
-            count=len(self._variables)
+            count=len(self._variables),
         )
         return
 
