@@ -1,14 +1,19 @@
+import math
+
 import numpy
 
 
 class _Constraint:
-    @classmethod
-    def evaluate(cls, variable_values, parameters):
+    @staticmethod
+    def evaluate(variable_values, parameters, output):
         """ Calculate error terms for each of the constraints in parameters.
         variable_values is a numpy array, parameters is a numpy record array with
         dtype matching `get_parameters()` return value. Variable instances in
         parameter arrays have integral type and are valid indices into variable_values,
-        numerical parameters have floating point type. """
+        numerical parameters have floating point type.
+
+        Output should be directly written into the output array (either like
+        `numpy.someop(somearg, out=output)`, or `output[:] = something`)"""
         raise NotImplementedError()
 
     def get_parametrers(self):
@@ -34,6 +39,30 @@ class VariableFixed(_Constraint):
 class Angle(_Constraint):
     """ Line absolute angle """
 
+    @staticmethod
+    def evaluate(variable_values, parameters, output):
+        # We're reusing arrays kind of aggresively ;-)
+        ax = numpy.take(variable_values, parameters["ax"])
+        bx = numpy.take(variable_values, parameters["bx"])
+        dx = numpy.subtract(bx, ax)
+
+        ay = numpy.take(variable_values, parameters["ay"], out=ax)
+        by = numpy.take(variable_values, parameters["by"], out=bx)
+        dy = numpy.subtract(by, ay, out=ay)
+
+        angle = numpy.arctan2(dy, dx, out=dx)
+        error1 = numpy.subtract(angle, parameters["angle"], out=angle)
+
+        # Normalize the angular differnce using
+        # (a + 180°) % 360° - 180°
+        # https://stackoverflow.com/questions/1878907/the-smallest-difference-between-2-angles
+        tmp = numpy.add(error1, math.pi, out=error1)
+        tmp = numpy.remainder(tmp, 2 * math.pi, out=tmp)
+        tmp = numpy.subtract(tmp, math.pi, out=tmp)
+
+        # Return error in degrees squared
+        numpy.square(tmp, out=output)
+
     def __init__(self, line, angle):
         self.line = line
         self.angle = angle
@@ -49,6 +78,24 @@ class Angle(_Constraint):
 
 
 class Perpendicular(_Constraint):
+    @staticmethod
+    def evaluate(variable_values, parameters, output):
+        # We're reusing arrays kind of aggresively ;-)
+        ax1 = numpy.take(variable_values, parameters["ax1"])
+        bx1 = numpy.take(variable_values, parameters["bx1"])
+        dx1 = numpy.subtract(bx1, ax1)
+        ay1 = numpy.take(variable_values, parameters["ay1"], out=ax1)
+        by1 = numpy.take(variable_values, parameters["by1"], out=bx1)
+        dy1 = numpy.subtract(by1, ay1)
+
+        ax2 = numpy.take(variable_values, parameters["ax2"], out=ax1)
+        bx2 = numpy.take(variable_values, parameters["bx2"], out=bx1)
+        dx2 = numpy.subtract(bx2, ax2)
+        ay2 = numpy.take(variable_values, parameters["ay2"], out=ax1)
+        by2 = numpy.take(variable_values, parameters["by2"], out=bx1)
+        dy2 = numpy.subtract(by2, ay2, out=ax1)
+        raise NotImplementedError()
+
     def __init__(self, line1, line2):
         self.line1 = line1
         self.line2 = line2

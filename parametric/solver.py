@@ -1,5 +1,6 @@
 import collections_extended
 import numpy
+import scipy.optimize
 
 import collections
 import itertools
@@ -16,6 +17,7 @@ class Solver:
         self._variables = util.IndexedDict()  # variable -> bag of constraints
         self._objects = {}  # object -> count
         self._constraints = {}  # responsible class -> _ConstraintBlock
+        self._constraint_count = 0
 
         self.auto_solve = True
 
@@ -44,6 +46,7 @@ class Solver:
         assert block.parameter_array.dtype == dtype
         block.constraints.append(constraint)
         block.parameter_array.append(parameter_values)
+        self._constraint_count += 1
 
         assert self._assert_internal_state()
         self._auto_solve()
@@ -83,6 +86,7 @@ class Solver:
             assert block.parameter_array.dtype == dtype
             index = block.constraints.index(c)
             block.parameter_array[index] = parameter_values
+        self._constraint_count -= 1
 
         assert self._assert_internal_state()
         self._auto_solve()
@@ -93,7 +97,26 @@ class Solver:
             dtype=self._number_dtype,
             count=len(self._variables),
         )
-        return
+
+        result = scipy.optimize.minimize(
+            method="SLSQP",
+            x0=initial,
+            # Objective function is to minimize distance to initial positions
+            fun=lambda x: numpy.sum((x - initial) ** 2),
+            jac=lambda x: 2 * (x - initial),
+            constraints={"type": "eq", "fun": self._evaluate_constraints, "jac": None},
+        )
+        print(result)
+
+    def _evaluate_constraints(self, x):
+        """ Evaluate all constraint errors into an array """
+        ret = numpy.empty(self._constraint_count, dtype=self._number_dtype)
+        i = 0
+        for responsible_class, block in self._constraints.items():
+            next_i = i + len(block.constraints)
+            responsible_class.evaluate(x, block.parameter_array.array(), ret[i:next_i])
+            i = next_i
+        return ret
 
     def _print_internal_state(self):
         for index, (var, constraints) in enumerate(self._variables.items()):
@@ -117,11 +140,14 @@ class Solver:
             responsible_class = self._get_responsible_class(constraint)
             assert constraint in self._constraints[responsible_class].constraints
 
+        constraint_count = 0
+
         for responsible_class, block in self._constraints.items():
             assert len(block.constraints) == len(block.parameter_array)
             assert len(block.constraints) > 0, "Empty constraint block"
             for i, constraint in enumerate(block.constraints):
                 assert constraint in constraints_from_variables
+                constraint_count += 1
 
                 constraint_parameters = constraint.get_parameters()
                 constraint_variables = self._constraint_variables(constraint_parameters)
@@ -133,6 +159,8 @@ class Solver:
                 dtype, values = self._constraint_parameters(constraint_parameters)
                 assert block.parameter_array.dtype == dtype
                 assert tuple(block.parameter_array[i]) == values
+
+        assert self._constraint_count == constraint_count
 
         # Returns True to allow using this method as `assert self._assert_internal_state()`
         return True
