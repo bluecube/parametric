@@ -1,6 +1,7 @@
 import collections_extended
 import numpy
 import scipy.optimize
+import autograd
 
 import collections
 import itertools
@@ -104,9 +105,16 @@ class Solver:
             # Objective function is to minimize distance to initial positions
             fun=lambda x: numpy.sum((x - initial) ** 2),
             jac=lambda x: 2 * (x - initial),
-            constraints={"type": "eq", "fun": self._evaluate_constraints, "jac": None},
+            constraints={
+                "type": "eq",
+                "fun": self._evaluate_constraints,
+                "jac": autograd.jacobian(self._evaluate_constraints)
+            },
         )
+        print()
         print(result)
+        print(self._evaluate_constraints(result.x))
+        print()
 
     def _evaluate_constraints(self, x):
         """ Evaluate all constraint errors into an array """
