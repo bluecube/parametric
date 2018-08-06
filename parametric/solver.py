@@ -108,7 +108,7 @@ class Solver:
             constraints={
                 "type": "eq",
                 "fun": self._evaluate_constraints,
-                "jac": autograd.jacobian(self._evaluate_constraints)
+                "jac": autograd.jacobian(self._evaluate_constraints),
             },
         )
         print()

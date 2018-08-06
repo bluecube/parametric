@@ -92,7 +92,7 @@ class Perpendicular(_Constraint):
         ay1 = numpy.take(variable_values, parameters["ay1"], out=ax1)
         by1 = numpy.take(variable_values, parameters["by1"], out=bx1)
         dy1 = numpy.subtract(by1, ay1)
-        len1 = numpy.sqrt(dx1*dx1 + dy1*dy1)
+        len1 = numpy.sqrt(dx1 * dx1 + dy1 * dy1)
         dx1 /= len1
         dy1 /= len1
 
@@ -102,7 +102,7 @@ class Perpendicular(_Constraint):
         ay2 = numpy.take(variable_values, parameters["ay2"], out=ax2)
         by2 = numpy.take(variable_values, parameters["by2"], out=bx2)
         dy2 = numpy.subtract(by2, ay2)
-        len2 = numpy.sqrt(dx2*dx2 + dy2*dy2)
+        len2 = numpy.sqrt(dx2 * dx2 + dy2 * dy2)
         dx2 /= len2
         dy2 /= len2
 
@@ -135,7 +135,7 @@ class Length(_Constraint):
         ay = numpy.take(variable_values, parameters["ay"], out=ax)
         by = numpy.take(variable_values, parameters["by"], out=bx)
         dy = numpy.subtract(by, ay)
-        length = numpy.sqrt(dx*dx + dy*dy)
+        length = numpy.sqrt(dx * dx + dy * dy)
 
         numpy.subtract(length, parameters["length"], out=output)
 
