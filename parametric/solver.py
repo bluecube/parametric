@@ -99,18 +99,22 @@ class Solver:
             count=len(self._variables),
         )
 
-        result = scipy.optimize.minimize(
-            method="SLSQP",
-            x0=initial,
-            # Objective function is to minimize distance to initial positions
-            fun=lambda x: numpy.sum((x - initial) ** 2),
-            jac=lambda x: 2 * (x - initial),
-            constraints={
-                "type": "eq",
-                "fun": self._evaluate_constraints,
-                "jac": autograd.jacobian(self._evaluate_constraints),
-            },
-        )
+        try:
+            result = scipy.optimize.minimize(
+                method="SLSQP",
+                x0=initial,
+                # Objective function is to minimize distance to initial positions
+                fun=lambda x: numpy.sum((x - initial) ** 2),
+                jac=lambda x: 2 * (x - initial),
+                constraints={
+                    "type": "eq",
+                    "fun": self._evaluate_constraints,
+                    "jac": autograd.jacobian(self._evaluate_constraints),
+                },
+            )
+        except KeyError as e:
+            print(e.args[0].__name__)
+            raise
         print()
         print(result)
         print(self._evaluate_constraints(result.x))

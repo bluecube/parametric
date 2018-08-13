@@ -1,6 +1,6 @@
 import math
 
-import numpy
+import autograd.numpy as numpy  # Wrapper to allow differentiating numpy functions
 
 
 class _Constraint:
@@ -49,24 +49,20 @@ class Angle(_Constraint):
 
     @staticmethod
     def evaluate(variable_values, parameters, output):
-        # We're reusing arrays kind of aggresively ;-)
-        ax = numpy.take(variable_values, parameters["ax"])
-        bx = numpy.take(variable_values, parameters["bx"])
-        dx = numpy.subtract(bx, ax)
+        ax = variable_values[parameters["ax"]]
+        bx = variable_values[parameters["bx"]]
+        dx = bx - ax
+        ay = variable_values[parameters["ay"]]
+        by = variable_values[parameters["by"]]
+        dy = by - ay
 
-        ay = numpy.take(variable_values, parameters["ay"], out=ax)
-        by = numpy.take(variable_values, parameters["by"], out=bx)
-        dy = numpy.subtract(by, ay, out=ay)
-
-        angle = numpy.arctan2(dy, dx, out=dx)
-        error1 = numpy.subtract(angle, parameters["angle"], out=angle)
+        angle = numpy.arctan2(dy, dx)
+        error1 = angle - parameters["angle"]
 
         # Normalize the angular differnce using
         # (a + 180°) % 360° - 180°
         # https://stackoverflow.com/questions/1878907/the-smallest-difference-between-2-angles
-        tmp = numpy.add(error1, math.pi, out=error1)
-        tmp = numpy.remainder(tmp, 2 * math.pi, out=tmp)
-        numpy.subtract(tmp, math.pi, out=output)
+        output = numpy.remainder(error1 + math.pi, 2 * math.pi) - math.pi
 
     def __init__(self, line, angle):
         self.line = line
@@ -85,28 +81,27 @@ class Angle(_Constraint):
 class Perpendicular(_Constraint):
     @staticmethod
     def evaluate(variable_values, parameters, output):
-        # TODO: Reuse arrays more
-        ax1 = numpy.take(variable_values, parameters["ax1"])
-        bx1 = numpy.take(variable_values, parameters["bx1"])
-        dx1 = numpy.subtract(bx1, ax1)
-        ay1 = numpy.take(variable_values, parameters["ay1"], out=ax1)
-        by1 = numpy.take(variable_values, parameters["by1"], out=bx1)
-        dy1 = numpy.subtract(by1, ay1)
+        ax1 = variable_values[parameters["ax1"]]
+        bx1 = variable_values[parameters["bx1"]]
+        dx1 = bx1 - ax1
+        ay1 = variable_values[parameters["ay1"]]
+        by1 = variable_values[parameters["by1"]]
+        dy1 = by1 - ay1
         len1 = numpy.sqrt(dx1 * dx1 + dy1 * dy1)
         dx1 /= len1
         dy1 /= len1
 
-        ax2 = numpy.take(variable_values, parameters["ax2"])
-        bx2 = numpy.take(variable_values, parameters["bx2"])
-        dx2 = numpy.subtract(bx2, ax2)
-        ay2 = numpy.take(variable_values, parameters["ay2"], out=ax2)
-        by2 = numpy.take(variable_values, parameters["by2"], out=bx2)
-        dy2 = numpy.subtract(by2, ay2)
+        ax2 = variable_values[parameters["ax2"]]
+        bx2 = variable_values[parameters["bx2"]]
+        dx2 = bx2 - ax2
+        ay2 = variable_values[parameters["ay2"]]
+        by2 = variable_values[parameters["by2"]]
+        dy2 = by2 - ay2
         len2 = numpy.sqrt(dx2 * dx2 + dy2 * dy2)
         dx2 /= len2
         dy2 /= len2
 
-        numpy.arccos(dx1 * dx2 + dy1 * dy2, out=output)
+        output = numpy.arccos(dx1 * dx2 + dy1 * dy2)
 
     def __init__(self, line1, line2):
         self.line1 = line1
