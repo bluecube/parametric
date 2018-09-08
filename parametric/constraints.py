@@ -1,6 +1,16 @@
 import math
 
+import autograd
 import autograd.numpy as numpy  # Wrapper to allow differentiating numpy functions
+
+# Work around missing arctan2 vjp in autograd version 1.2
+# The impormentation is mostly copied from unreleased autograd commit 47019791
+# Autograd, why U no release!?
+autograd.extend.defvjp(
+    numpy.arctan2,
+    lambda ans, x, y: lambda g: g * y / (x ** 2 + y ** 2),
+    lambda ans, x, y: lambda g: g * -x / (x ** 2 + y ** 2),
+)
 
 
 class _Constraint:
@@ -34,8 +44,8 @@ class VariableFixed(_Constraint):
 
     @staticmethod
     def evaluate(variable_values, parameters, output):
-        v = numpy.take(variable_values, parameters["variable"])
-        numpy.subtract(v, parameters["value"], out=output)
+        v = variable_values[parameters["variable"]]
+        output = v - parameters["value"]
 
     def __init__(self, variable):
         self.variable = variable
@@ -124,15 +134,15 @@ class Length(_Constraint):
     @staticmethod
     def evaluate(variable_values, parameters, output):
         # TODO: Reuse arrays more
-        ax = numpy.take(variable_values, parameters["ax"])
-        bx = numpy.take(variable_values, parameters["bx"])
-        dx = numpy.subtract(bx, ax)
-        ay = numpy.take(variable_values, parameters["ay"], out=ax)
-        by = numpy.take(variable_values, parameters["by"], out=bx)
-        dy = numpy.subtract(by, ay)
+        ax = variable_values[parameters["ax"]]
+        bx = variable_values[parameters["bx"]]
+        dx = bx - ax
+        ay = variable_values[parameters["ay"]]
+        by = variable_values[parameters["by"]]
+        dy = by - ay
         length = numpy.sqrt(dx * dx + dy * dy)
 
-        numpy.subtract(length, parameters["length"], out=output)
+        output = length - parameters["length"]
 
     def __init__(self, line, length):
         self.line = line
@@ -153,9 +163,7 @@ class VariablesEqual(_Constraint):
     # solver and replaced by the other in all uses
     @staticmethod
     def evaluate(variable_values, parameters, output):
-        v1 = numpy.take(variable_values, parameters["v1"])
-        v2 = numpy.take(variable_values, parameters["v2"])
-        numpy.subtract(v2, v1, out=output)
+        output = variable_values[parameters["v1"]] - variable_values[parameters["v2"]]
 
     def __init__(self, variable1, variable2):
         self.variable1 = variable1
