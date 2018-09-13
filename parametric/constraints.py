@@ -45,7 +45,7 @@ class VariableFixed(_Constraint):
     @staticmethod
     def evaluate(variable_values, parameters, output):
         v = variable_values[parameters["variable"]]
-        output = v - parameters["value"]
+        output[:] = v - parameters["value"]
 
     def __init__(self, variable):
         self.variable = variable
