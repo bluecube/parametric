@@ -43,22 +43,22 @@ class VariableFixed(_Constraint):
     used as a soft constraint. """
 
     @staticmethod
-    def evaluate(variable_values, parameters, output):
-        v = variable_values[parameters["variable"]]
-        output[:] = v - parameters["value"]
+    def evaluate(variable_values, parameters):
+        return variable_values[parameters["variable"]] - parameters["value"]
 
-    def __init__(self, variable):
+    def __init__(self, variable, value):
         self.variable = variable
+        self.value = value
 
     def get_parameters(self):
-        return [("variable", self.variable), ("value", float(self.variable))]
+        return [("variable", self.variable), ("value", self.value)]
 
 
 class Angle(_Constraint):
     """ Line absolute angle """
 
     @staticmethod
-    def evaluate(variable_values, parameters, output):
+    def evaluate(variable_values, parameters):
         ax = variable_values[parameters["ax"]]
         bx = variable_values[parameters["bx"]]
         dx = bx - ax
@@ -72,7 +72,7 @@ class Angle(_Constraint):
         # Normalize the angular differnce using
         # (a + 180°) % 360° - 180°
         # https://stackoverflow.com/questions/1878907/the-smallest-difference-between-2-angles
-        output = numpy.remainder(error1 + math.pi, 2 * math.pi) - math.pi
+        return numpy.remainder(error1 + math.pi, 2 * math.pi) - math.pi
 
     def __init__(self, line, angle):
         self.line = line
@@ -90,7 +90,7 @@ class Angle(_Constraint):
 
 class Perpendicular(_Constraint):
     @staticmethod
-    def evaluate(variable_values, parameters, output):
+    def evaluate(variable_values, parameters):
         ax1 = variable_values[parameters["ax1"]]
         bx1 = variable_values[parameters["bx1"]]
         dx1 = bx1 - ax1
@@ -111,7 +111,7 @@ class Perpendicular(_Constraint):
         dx2 /= len2
         dy2 /= len2
 
-        output = numpy.arccos(dx1 * dx2 + dy1 * dy2)
+        return numpy.arccos(dx1 * dx2 + dy1 * dy2)
 
     def __init__(self, line1, line2):
         self.line1 = line1
@@ -132,7 +132,7 @@ class Perpendicular(_Constraint):
 
 class Length(_Constraint):
     @staticmethod
-    def evaluate(variable_values, parameters, output):
+    def evaluate(variable_values, parameters):
         # TODO: Reuse arrays more
         ax = variable_values[parameters["ax"]]
         bx = variable_values[parameters["bx"]]
@@ -142,7 +142,7 @@ class Length(_Constraint):
         dy = by - ay
         length = numpy.sqrt(dx * dx + dy * dy)
 
-        output = length - parameters["length"]
+        return length - parameters["length"]
 
     def __init__(self, line, length):
         self.line = line
@@ -162,8 +162,8 @@ class VariablesEqual(_Constraint):
     # TODO: When two variables are equal one of them should be removed from the
     # solver and replaced by the other in all uses
     @staticmethod
-    def evaluate(variable_values, parameters, output):
-        output = variable_values[parameters["v1"]] - variable_values[parameters["v2"]]
+    def evaluate(variable_values, parameters):
+        return variable_values[parameters["v1"]] - variable_values[parameters["v2"]]
 
     def __init__(self, variable1, variable2):
         self.variable1 = variable1

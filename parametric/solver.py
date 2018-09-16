@@ -122,12 +122,9 @@ class Solver:
 
     def _evaluate_constraints(self, x):
         """ Evaluate all constraint errors into an array """
-        ret = numpy.empty(self._constraint_count, dtype=self._number_dtype)
-        i = 0
-        for responsible_class, block in self._constraints.items():
-            next_i = i + len(block.constraints)
-            responsible_class.evaluate(x, block.parameter_array.array(), ret[i:next_i])
-            i = next_i
+        return numpy.hstack(responsible_class.evaluate(x, block.parameter_array.array())
+                            for responsible_class, block
+                            in self._constraints.items())
         return ret
 
     def _print_internal_state(self):
