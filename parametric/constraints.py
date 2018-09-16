@@ -84,7 +84,7 @@ class Angle(_Constraint):
             ("ay", self.line.a.y),
             ("bx", self.line.b.x),
             ("by", self.line.b.y),
-            ("angle", self.angle),
+            ("angle", math.radians(self.angle)),
         ]
 
 

@@ -9,6 +9,7 @@ import itertools
 from . import util
 from . import objects
 
+from pprint import pprint
 
 class Solver:
     _variable_index_dtype = numpy.uint32
@@ -99,25 +100,46 @@ class Solver:
             count=len(self._variables),
         )
 
+        def p(fun):
+            def wrapped(*args, **kwargs):
+                print(str(fun))
+                pprint(args)
+                pprint(kwargs)
+                ret = fun(*args, **kwargs)
+                pprint(ret)
+                print()
+                return ret
+            return wrapped
+
+        def goal(x):
+            return numpy.sum((x - initial) ** 2)
+
+        def goal_jac(x):
+            return 2 * (x - initial)
+
         try:
             result = scipy.optimize.minimize(
                 method="SLSQP",
                 x0=initial,
                 # Objective function is to minimize distance to initial positions
-                fun=lambda x: numpy.sum((x - initial) ** 2),
-                jac=lambda x: 2 * (x - initial),
+                fun=p(goal),
+                jac=p(goal_jac),
                 constraints={
                     "type": "eq",
-                    "fun": self._evaluate_constraints,
-                    "jac": autograd.jacobian(self._evaluate_constraints),
+                    "fun": p(self._evaluate_constraints),
+                    "jac": p(self._evaluate_constraint_jacobians),
                 },
             )
         except KeyError as e:
             print(e.args[0].__name__)
             raise
+
+        for v, variable in zip(result.x, self._variables):
+            variable._value = v
+
         print()
-        print(result)
-        print(self._evaluate_constraints(result.x))
+        print("result", result)
+        print("errors", self._evaluate_constraints(result.x))
         print()
 
     def _evaluate_constraints(self, x):
@@ -126,6 +148,16 @@ class Solver:
                             for responsible_class, block
                             in self._constraints.items())
         return ret
+
+    def _evaluate_constraint_jacobians(self, x):
+        print("Jacobians")
+        for responsible_class, block in self._constraints.items():
+            print(str(responsible_class.evaluate), autograd.jacobian(lambda x: responsible_class.evaluate(x, block.parameter_array.array()))(x))
+        print()
+
+        return numpy.vstack(autograd.jacobian(lambda x: responsible_class.evaluate(x, block.parameter_array.array()))(x)
+                            for responsible_class, block
+                            in self._constraints.items())
 
     def _print_internal_state(self):
         for index, (var, constraints) in enumerate(self._variables.items()):
