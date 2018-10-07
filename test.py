@@ -20,11 +20,17 @@ s.add_constraint(parametric.VariableFixed(a.y, float(a.y)))
 s.add_constraint(parametric.Angle(la, -90 - angle))
 s.add_constraint(parametric.Perpendicular(la, lb))
 s.add_constraint(parametric.Length(lb, thickness))
-#s.add_constraint(parametric.Perpendicular(lc, ld))
-#s.add_constraint(parametric.Length(lc, thickness))
-#s.add_constraint(parametric.Horizontal(ld.a, ld.b))
+s.add_constraint(parametric.Perpendicular(lc, ld))
+s.add_constraint(parametric.Length(lc, thickness))
+s.add_constraint(parametric.Horizontal(ld.a, ld.b))
 
 print(float(a.x), float(a.y))
 print(float(b.x), float(b.y))
+print(float(c.x), float(c.y))
+print(float(d.x), float(d.y))
+
+import pkg_resources
+
+print(pkg_resources.resource_string(__name__, "test.py"))
 
 #s._print_internal_state()
