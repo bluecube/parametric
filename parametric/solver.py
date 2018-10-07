@@ -150,11 +150,6 @@ class Solver:
         return ret
 
     def _evaluate_constraint_jacobians(self, x):
-        print("Jacobians")
-        for responsible_class, block in self._constraints.items():
-            print(str(responsible_class.evaluate), autograd.jacobian(lambda x: responsible_class.evaluate(x, block.parameter_array.array()))(x))
-        print()
-
         return numpy.vstack(autograd.jacobian(lambda x: responsible_class.evaluate(x, block.parameter_array.array()))(x)
                             for responsible_class, block
                             in self._constraints.items())
