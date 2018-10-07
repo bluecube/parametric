@@ -97,9 +97,7 @@ class Perpendicular(_Constraint):
         ay1 = variable_values[parameters["ay1"]]
         by1 = variable_values[parameters["by1"]]
         dy1 = by1 - ay1
-        len1 = numpy.sqrt(dx1 * dx1 + dy1 * dy1)
-        dx1 /= len1
-        dy1 /= len1
+        len1_2 = dx1 * dx1 + dy1 * dy1
 
         ax2 = variable_values[parameters["ax2"]]
         bx2 = variable_values[parameters["bx2"]]
@@ -107,11 +105,12 @@ class Perpendicular(_Constraint):
         ay2 = variable_values[parameters["ay2"]]
         by2 = variable_values[parameters["by2"]]
         dy2 = by2 - ay2
-        len2 = numpy.sqrt(dx2 * dx2 + dy2 * dy2)
-        dx2 /= len2
-        dy2 /= len2
+        len2_2 = dx2 * dx2 + dy2 * dy2
 
-        return numpy.arccos(dx1 * dx2 + dy1 * dy2)
+        target_length = numpy.sqrt(len1_2 + len2_2)
+        actual_length = numpy.hypot(dx1 - dx2, dy1 - dy2)
+
+        return actual_length - target_length
 
     def __init__(self, line1, line2):
         self.line1 = line1
