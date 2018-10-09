@@ -7,6 +7,7 @@ import autograd
 
 import pytest
 
+
 def get_constraint_parameters(c):
     dtype = []
     variable_values = []
@@ -20,28 +21,31 @@ def get_constraint_parameters(c):
             dtype.append((name, float))
             parameters.append(value)
 
-    return numpy.array(variable_values, dtype=float), \
-           numpy.array(parameters, dtype=dtype)
+    return (
+        numpy.array(variable_values, dtype=float),
+        numpy.array(parameters, dtype=dtype),
+    )
+
 
 @pytest.mark.parametrize(
     "constraint",
     [
         VariableFixed(Variable(5), 3),
-        Angle(LineSegment(Point(Variable(0),
-                                Variable(0)),
-                          Point(Variable(10),
-                                Variable(0))),
-              45),
-        Perpendicular(LineSegment(Point(Variable(0),
-                                  Variable(0)),
-                            Point(Variable(10),
-                                  Variable(0))),
-                      LineSegment(Point(Variable(1),
-                                  Variable(1)),
-                            Point(Variable(10),
-                                  Variable(0)))
-        )
-    ]
+        Angle(
+            LineSegment(
+                Point(Variable(0), Variable(0)), Point(Variable(10), Variable(0))
+            ),
+            45,
+        ),
+        Perpendicular(
+            LineSegment(
+                Point(Variable(0), Variable(0)), Point(Variable(10), Variable(0))
+            ),
+            LineSegment(
+                Point(Variable(1), Variable(1)), Point(Variable(10), Variable(0))
+            ),
+        ),
+    ],
 )
 def test_constraint_evaluate(constraint):
     values, parameters = get_constraint_parameters(constraint)

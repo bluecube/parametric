@@ -11,6 +11,7 @@ from . import objects
 
 from pprint import pprint
 
+
 class Solver:
     _variable_index_dtype = numpy.uint32
     _number_dtype = numpy.float64
@@ -109,6 +110,7 @@ class Solver:
                 pprint(ret)
                 print()
                 return ret
+
             return wrapped
 
         def goal(x):
@@ -144,15 +146,19 @@ class Solver:
 
     def _evaluate_constraints(self, x):
         """ Evaluate all constraint errors into an array """
-        return numpy.hstack(responsible_class.evaluate(x, block.parameter_array.array())
-                            for responsible_class, block
-                            in self._constraints.items())
+        return numpy.hstack(
+            responsible_class.evaluate(x, block.parameter_array.array())
+            for responsible_class, block in self._constraints.items()
+        )
         return ret
 
     def _evaluate_constraint_jacobians(self, x):
-        return numpy.vstack(autograd.jacobian(lambda x: responsible_class.evaluate(x, block.parameter_array.array()))(x)
-                            for responsible_class, block
-                            in self._constraints.items())
+        return numpy.vstack(
+            autograd.jacobian(
+                lambda x: responsible_class.evaluate(x, block.parameter_array.array())
+            )(x)
+            for responsible_class, block in self._constraints.items()
+        )
 
     def _print_internal_state(self):
         for index, (var, constraints) in enumerate(self._variables.items()):
