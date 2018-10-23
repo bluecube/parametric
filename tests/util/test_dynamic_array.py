@@ -1,7 +1,10 @@
-from parametric.util import DynamicArray
+# pylint: disable=redefined-outer-name
+# pylint: disable=W0212
 
 import numpy
 import pytest
+
+from parametric.util import DynamicArray
 
 
 @pytest.mark.parametrize(
@@ -13,7 +16,7 @@ def test_construction_empty(dtype, size_hint):
 
     assert len(da) == 0
     with pytest.raises(IndexError):
-        da[1]
+        da[1]  # noqa
     if size_hint:
         assert len(da._array) == size_hint
 
@@ -97,7 +100,7 @@ def test_pop_n(array):
 
 
 def test_indexing_single(array):
-    for i in range(len(array)):
+    for i in range(len(array)):  # noqa
         assert array[i] == i
 
 

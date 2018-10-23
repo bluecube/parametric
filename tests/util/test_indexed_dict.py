@@ -1,6 +1,9 @@
-from parametric.util import IndexedDict
+# pylint: disable=redefined-outer-name
+# pylint: disable=W0212
 
 import pytest
+
+from parametric.util import IndexedDict
 
 
 def test_empty_construction():
@@ -49,7 +52,7 @@ def test_get_key_found(d, indexing):
 
 @pytest.mark.parametrize("indexing", [{"key": "x"}, {"index": 100}, {"index": -6}])
 def test_get_missing_default(d, indexing):
-    assert d.get(**indexing) == None
+    assert d.get(**indexing) is None
 
 
 def test_get_both_key_and_index(d):
@@ -253,7 +256,7 @@ def test_getitem(d):
 
 def test_getitem_missing(d):
     with pytest.raises(KeyError):
-        d["X"]
+        d["X"]  # noqa
 
 
 def test_setitem_overwrite(d):
@@ -293,5 +296,5 @@ def test_values(d):
 
 def test_none_key(d):
     d[None] = None
-    assert d[None] == None
+    assert d[None] is None
     assert list(d) == list("abcde") + [None]

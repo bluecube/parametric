@@ -1,11 +1,7 @@
+import pytest
+
 from parametric.constraints import *
 from parametric.objects import *
-
-import math
-
-import autograd
-
-import pytest
 
 
 def get_constraint_parameters(c):
@@ -55,4 +51,5 @@ def test_constraint_evaluate(constraint):
 
     print()
     print(type(constraint))
-    print(eval_func(values), autograd.jacobian(eval_func)(values))
+    print(eval_func(values))
+    print(autograd.jacobian(eval_func)(values))  # noqa
