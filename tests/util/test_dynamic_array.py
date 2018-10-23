@@ -112,6 +112,11 @@ def test_indexing_slices(array):
             )
 
 
+@pytest.mark.parametrize("dtype", [int, float, complex])
+def test_array_protocol(array, dtype):
+    numpy.array(array, dtype=dtype)
+
+
 def test_record_dtype():
     array = DynamicArray(dtype=[("a", numpy.int32), ("b", numpy.float32)])
     for i in range(100):

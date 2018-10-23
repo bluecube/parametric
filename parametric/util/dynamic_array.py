@@ -101,7 +101,7 @@ class DynamicArray:
         if dtype is None:
             return self.array()
         else:
-            return self.array(self.array(), dtype=dtype)
+            return numpy.array(self.array(), dtype=dtype)
 
     def __getitem__(self, key):
         return self.array()[key]
