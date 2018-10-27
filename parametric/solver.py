@@ -101,18 +101,6 @@ class Solver:
             count=len(self._variables),
         )
 
-        def p(fun):
-            def wrapped(*args, **kwargs):
-                print(str(fun))
-                pprint(args)
-                pprint(kwargs)
-                ret = fun(*args, **kwargs)
-                pprint(ret)
-                print()
-                return ret
-
-            return wrapped
-
         def goal(x):
             return numpy.sum((x - initial) ** 2)
 
@@ -124,25 +112,19 @@ class Solver:
                 method="SLSQP",
                 x0=initial,
                 # Objective function is to minimize distance to initial positions
-                fun=p(goal),
-                jac=p(goal_jac),
+                fun=goal,
+                jac=goal_jac,
                 constraints={
                     "type": "eq",
-                    "fun": p(self._evaluate_constraints),
-                    "jac": p(self._evaluate_constraint_jacobians),
+                    "fun": self._evaluate_constraints,
+                    "jac": self._evaluate_constraint_jacobians,
                 },
             )
         except KeyError as e:
-            print(e.args[0].__name__)
             raise
 
         for v, variable in zip(result.x, self._variables):
             variable._value = v
-
-        print()
-        print("result", result)
-        print("errors", self._evaluate_constraints(result.x))
-        print()
 
     def _evaluate_constraints(self, x):
         """ Evaluate all constraint errors into an array """
