@@ -1,7 +1,7 @@
+
 class Variable:
-    def __init__(self, value=None, fixed=False, name=None):
+    def __init__(self, value, name=None):
         self._value = value
-        self.fixed = fixed
         self.name = name
 
     def get_variables(self):
@@ -18,10 +18,9 @@ class Variable:
 
 
 class Point:
-    def __init__(self, x=None, y=None, fixed=False, name=None):
-        self.fixed = fixed
-        self.x = Variable(x, fixed, None if name is None else name + ".x")
-        self.y = Variable(y, fixed, None if name is None else name + ".y")
+    def __init__(self, x, y, name=None):
+        self.x = Variable(x, None if name is None else name + ".x")
+        self.y = Variable(y, None if name is None else name + ".y")
         self.name = name
 
     def get_variables(self):
