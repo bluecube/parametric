@@ -1,13 +1,7 @@
-import itertools
-
-
 class Variable:
     def __init__(self, value, name=None):
         self._value = value
         self.name = name
-
-    def get_variables(self):
-        yield self
 
     def __float__(self):
         return float(self._value)
@@ -22,10 +16,6 @@ class Point:
         self.y = Variable(y, None if name is None else name + ".y")
         self.name = name
 
-    def get_variables(self):
-        yield self.x
-        yield self.y
-
     def __iter__(self):
         yield self.x
         yield self.y
@@ -38,10 +28,6 @@ class LineSegment:
     def __init__(self, a, b):
         self.a = a
         self.b = b
-
-    def get_variables(self):
-        yield from self.a.get_variables()
-        yield from self.b.get_variables()
 
 
 class Polyline:
@@ -57,9 +43,6 @@ class Polyline:
             LineSegment(p1, p2) for p1, p2 in zip(self.points[:-1], self.points[1:])
         ]
         self.line_segments.append(LineSegment(self.points[-1], self.points[0]))
-
-    def get_variables(self):
-        return itertools.chain.from_iterable(p.get_variables() for p in self.points)
 
     def __getitem__(self, index):
         return self.points[index]
