@@ -12,11 +12,8 @@ class Variable:
     def __float__(self):
         return float(self._value)
 
-    def __str__(self):
-        if self.name is None:
-            return "Variable at 0x{:x} ({})".format(id(self), float(self))
-        else:
-            return "Variable {} ({})".format(self.name, float(self))
+    def __repr__(self):
+        return "{}({}, name={})".format(self.__class__.__name__, self._value, self.name)
 
 
 class Point:
@@ -32,6 +29,9 @@ class Point:
     def __iter__(self):
         yield self.x
         yield self.y
+
+    def __repr__(self):
+        return "{}({}, {})".format(self.__class__.__name__, repr(self.x), repr(self.y))
 
 
 class LineSegment:
@@ -69,3 +69,6 @@ class Polyline:
 
     def __len__(self):
         return len(self.points)
+
+    def __repr__(self):
+        return "{}({})".format(self.__class__.__name__, repr(self.points))
