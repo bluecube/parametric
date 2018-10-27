@@ -57,7 +57,7 @@ class VariableFixed(_Constraint):
         return [("variable", self.variable), ("value", self.value)]
 
 
-class Angle(_Constraint):
+class AbsoluteAngle(_Constraint):
     """ Line absolute angle """
 
     @staticmethod

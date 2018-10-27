@@ -27,7 +27,7 @@ def get_constraint_parameters(c):
     "constraint",
     [
         VariableFixed(Variable(5), 3),
-        Angle(
+        AbsoluteAngle(
             LineSegment(
                 Point(Variable(0), Variable(0)), Point(Variable(10), Variable(0))
             ),

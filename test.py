@@ -17,7 +17,7 @@ ld = parametric.LineSegment(d, a)
 
 s.add_constraint(parametric.VariableFixed(a.x, float(a.x)))
 s.add_constraint(parametric.VariableFixed(a.y, float(a.y)))
-s.add_constraint(parametric.Angle(la, -90 - angle))
+s.add_constraint(parametric.AbsoluteAngle(la, -90 - angle))
 s.add_constraint(parametric.Perpendicular(la, lb))
 s.add_constraint(parametric.Length(lb, thickness))
 s.add_constraint(parametric.Perpendicular(lc, ld))
