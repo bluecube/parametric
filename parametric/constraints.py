@@ -46,9 +46,12 @@ class VariableFixed(_Constraint):
     def evaluate(variable_values, parameters):
         return variable_values[parameters["variable"]] - parameters["value"]
 
-    def __init__(self, variable, value):
+    def __init__(self, variable, value=None):
         self.variable = variable
-        self.value = value
+        if value is None:
+            self.value = float(variable)
+        else:
+            self.value = value
 
     def get_parameters(self):
         return [("variable", self.variable), ("value", self.value)]
