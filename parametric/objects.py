@@ -1,3 +1,5 @@
+import itertools
+
 
 class Variable:
     def __init__(self, value, name=None):
@@ -27,6 +29,10 @@ class Point:
         yield self.x
         yield self.y
 
+    def __iter__(self):
+        yield self.x
+        yield self.y
+
 
 class LineSegment:
     def __init__(self, a, b):
@@ -37,3 +43,29 @@ class LineSegment:
         yield from self.a.get_variables()
         yield from self.b.get_variables()
 
+
+class Polyline:
+    """ A closed polyline. """
+
+    def __init__(self, coords, name=None):
+        """ Make the polyline from a list of pairs with point coordinates """
+        self.points = [
+            Point(c[0], c[1], None if name is None else "{}[{}]".format(name, i))
+            for i, c in enumerate(coords)
+        ]
+        self.line_segments = [
+            LineSegment(p1, p2) for p1, p2 in zip(self.points[:-1], self.points[1:])
+        ]
+        self.line_segments.append(LineSegment(self.points[-1], self.points[0]))
+
+    def get_variables(self):
+        return itertools.chain.from_iterable(p.get_variables() for p in self.points)
+
+    def __getitem__(self, index):
+        return self.points[index]
+
+    def __iter__(self):
+        return iter(self.points)
+
+    def __len__(self):
+        return len(self.points)
