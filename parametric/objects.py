@@ -30,6 +30,16 @@ class LineSegment:
         self.b = b
 
 
+class Arc:
+    def __init__(self, a, b, h):
+        """ Create an arc with endpoints a and b and height h.
+        Height is a distance between (midpoint of a and b) and midpoint of the arc.
+        Positive height puts the arc midpoint on the right side of line ab (arc curves counterclockwise), negative on the left. """
+        self.a = a
+        self.b = b
+        self.h = h
+
+
 class Polyline:
     """ A closed polyline. """
 

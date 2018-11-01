@@ -187,3 +187,66 @@ class Horizontal(VariablesEqual):
         super().__init__(point1.y, point2.y)
         self.point1 = point1
         self.point2 = point2
+
+
+class ArcLength(_Constraint):
+    def __init__(self, arc, length):
+        self.arc = arc
+        self.length = length
+
+    def get_parameters(self):
+        return [
+            ("ax", self.arc.a.x),
+            ("ay", self.arc.a.x),
+            ("bx", self.arc.b.x),
+            ("by", self.arc.b.y),
+            ("h", self.arc.r),
+            ("length", self.length)
+        ]
+
+    @staticmethod
+    def evaluate(variable_values, parameters):
+        ax = variable_values[parameters["ax"]]
+        bx = variable_values[parameters["bx"]]
+        ay = variable_values[parameters["ay"]]
+        by = variable_values[parameters["by"]]
+
+        h = variable_values[parameters["h"]]
+        c = numpy.hypot(bx - ax, by - ay)
+
+        h2 = 2 * h
+
+        length_h0 = c + h2 * h2 / c
+        length = numpy.atan2(h2, c) * (c * c / h2 + h2)
+        length = numpy.where(h < 1e-6, length_h0, length)
+
+        return length - variable_values[parameters["length"]]
+
+
+class ArcRadius(_Constraint):
+    def __init__(self, arc, length):
+        self.arc = arc
+        self.radius = radius
+
+    def get_parameters(self):
+        return [
+            ("ax", self.arc.a.x),
+            ("ay", self.arc.a.x),
+            ("bx", self.arc.b.x),
+            ("by", self.arc.b.y),
+            ("h", self.arc.r),
+            ("radius", self.radius)
+        ]
+
+    @staticmethod
+    def evaluate(variable_values, parameters):
+        ax = variable_values[parameters["ax"]]
+        bx = variable_values[parameters["bx"]]
+        ay = variable_values[parameters["ay"]]
+        by = variable_values[parameters["by"]]
+
+        h = variable_values[parameters["h"]]
+        c = numpy.hypot(bx - ax, by - ay)
+
+        radius = c * c / (8 * h) + h
+        return radius - variable_values[parameters["radius"]]
